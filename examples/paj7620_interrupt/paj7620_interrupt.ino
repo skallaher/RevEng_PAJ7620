@@ -42,10 +42,11 @@ void setup()
 
 void loop()
 {
-  
+
   int gesture;
   if (isr == true)
   {
+    long stamp = millis();
     isr = false;
     gesture = sensor.readGesture();
 
@@ -53,59 +54,64 @@ void loop()
     {
       case GES_FORWARD:
         {
-          Serial.println("GES_FORWARD");
+          Serial.print(" GES_FORWARD");
           break;
         }
 
       case GES_BACKWARD:
         {
-          Serial.println("GES_BACKWARD");
+          Serial.print(" GES_BACKWARD");
           break;
         }
 
       case GES_LEFT:
         {
-          Serial.println("GES_LEFT");
+          Serial.print(" GES_LEFT");
           break;
         }
 
       case GES_RIGHT:
         {
-          Serial.println("GES_RIGHT");
+          Serial.print(" GES_RIGHT");
           break;
         }
 
       case GES_UP:
         {
-          Serial.println("GES_UP");
+          Serial.print(" GES_UP");
           break;
         }
 
       case GES_DOWN:
         {
-          Serial.println("GES_DOWN");
+          Serial.print(" GES_DOWN");
           break;
         }
 
       case GES_CLOCKWISE:
         {
-          Serial.println("GES_CLOCKWISE");
+          Serial.print(" GES_CLOCKWISE");
           break;
         }
 
       case GES_CNTRCLOCKWISE:
         {
-          Serial.println("GES_CNTRCLOCKWISE");
+          Serial.print(" GES_CNTRCLOCKWISE");
           break;
         }
 
+      case GES_WAVE:
+        {
+          Serial.print(" GES_WAVE");
+          break;
+        }
       case GES_NONE:
         {
-          Serial.println("GES_NONE");
+          Serial.print(" GES_NONE");
           break;
         }
     }
-
+    Serial.println(", Code: " + String(gesture) + " - Gesture handled in " + String (millis() - stamp) + " ms");
     if (isr == true)
     {
       Serial.println(" --> Interrupt during event processing");
@@ -116,8 +122,7 @@ void loop()
 void interruptRoutine()
 {
   isr = true;
-  // Serial.println("Interrupt!");
+  Serial.print("Interrupt!");
 }
-
 
 

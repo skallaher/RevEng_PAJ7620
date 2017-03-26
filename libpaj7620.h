@@ -54,7 +54,7 @@ enum {
         You also can adjust the reaction time according to the actual circumstance.
 */
 #define GES_ENTRY_TIME		0 // 150// 200 // 800				// When you want to recognize the Forward/Backward gestures, your gestures' reaction time must less than GES_ENTRY_TIME(0.8s). 
-#define GES_QUIT_TIME			100 // 200 //300 // 1000
+#define GES_QUIT_TIME		200 //300 // 1000
 
 
 #define BIT(x)  1 << x

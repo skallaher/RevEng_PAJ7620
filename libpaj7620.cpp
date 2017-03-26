@@ -306,6 +306,8 @@ int PAJ7620U::readGesture()
         }
         break;
     }
+    // Read register again to clear spurious interrupts
+    readRegister(0x43, 1, &data);
   }
 }
 

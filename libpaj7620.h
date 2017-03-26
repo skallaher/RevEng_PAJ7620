@@ -128,6 +128,7 @@ class PAJ7620U
   public:
     uint8_t begin();
     int readGesture();
+    void cancelGesture();
 
   private:
     uint8_t writeRegister(uint8_t addr, uint8_t cmd);

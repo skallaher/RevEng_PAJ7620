@@ -173,6 +173,13 @@ uint8_t PAJ7620U::begin()
 }
 
 
+void PAJ7620U::cancelGesture()
+{
+    // Read register  to clear spurious interrupts
+    uint8_t data = 0, data1 = 0;
+    readRegister(0x43, 1, &data);
+    readRegister(0x44, 1, &data1);
+}
 
 int PAJ7620U::readGesture()
 {
@@ -306,8 +313,6 @@ int PAJ7620U::readGesture()
         }
         break;
     }
-    // Read register again to clear spurious interrupts
-    readRegister(0x43, 1, &data);
   }
 }
 

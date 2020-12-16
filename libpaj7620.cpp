@@ -133,10 +133,18 @@ void PAJ7620U::initializeDeviceSettings()
 {
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
-  // Initialize chip configuration
   for (int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
-  {
-    writeRegister(initRegisterArray[i][0], initRegisterArray[i][1]);
+	{
+    #ifdef PROGMEM_COMPATIBLE
+		  uint16_t word = pgm_read_word(&initRegisterArray[i]);
+    #else
+        uint16_t word = initRegisterArray[i];
+    #endif
+
+		uint8_t high, low;
+		high = (word & 0xFF00) >> 8;
+		low = (word & 0x00FF);
+		writeRegister(high, low);
   }
 }
 

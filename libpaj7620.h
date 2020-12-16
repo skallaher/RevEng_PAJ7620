@@ -5,6 +5,7 @@
    Modified Time: June 2015
 
    2017 - Modified by MarcFinns to encapsulate in class without global variables
+   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
    Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
   				move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
@@ -30,7 +31,8 @@
    THE SOFTWARE.
 */
 
-#pragma once
+#ifndef __PAJ7620_H__
+#define __PAJ7620_H__
 
 #include <Wire.h>
 
@@ -364,3 +366,4 @@ class PAJ7620U
 
 
 
+#endif

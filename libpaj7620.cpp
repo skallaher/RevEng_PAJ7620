@@ -34,30 +34,25 @@
 #include "Arduino.h"
 
 
-
 /****************************************************************
-   Function Name: paj7620WriteReg
+   Function Name: writeRegister
    Description:  PAJ7620 Write reg cmd
    Parameters: addr:reg address; cmd:function data
    Return: error code; success: return 0
 ****************************************************************/
 uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
 {
-  char i = 1;
-  Wire.beginTransmission(PAJ7620_ID);   // start transmission to device
-  //write cmd
-  Wire.write(addr);           // send register address
-  Wire.write(cmd);            // send value to write
-  i = Wire.endTransmission();         // end transmission
-  if (0 != i)
-  {
-    // Serial.print("Transmission error!!!\n");
-  }
-  return i;
+  uint8_t result = 0;
+  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission to device
+  Wire.write(addr);                     // send register address
+  Wire.write(cmd);                      // send value to write
+  result = Wire.endTransmission();      // end transmission
+  return result;
 }
 
+
 /****************************************************************
-   Function Name: paj7620ReadReg
+   Function Name: readRegister
    Description:  PAJ7620 read reg data
    Parameters: addr:reg address;
            qty:number of data to read, addr continuously increase;
@@ -67,33 +62,26 @@ uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
 uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
   uint8_t error;
-  Wire.beginTransmission(PAJ7620_ID);
+  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
   Wire.write(addr);
   error = Wire.endTransmission();
 
-  if (0 != error)
+  if (error)
   {
-    // Serial.print("Transmission error!!!\n");
     return error; //return error code
   }
 
-  Wire.requestFrom((int)PAJ7620_ID, (int)qty);
+  Wire.requestFrom((int)PAJ7620_I2C_BUS_ADDR, (int)qty);
 
   while (Wire.available())
   {
     *data = Wire.read();
-
-#ifdef debug    //debug
-    // Serial.print("addr:");
-    // Serial.print(addr++, HEX);
-    // Serial.print("  data:");
-    // Serial.println(*data, HEX);
-#endif
-
     data++;
   }
+
   return 0;
 }
+
 
 /****************************************************************
    Function Name: selectRegisterBank
@@ -105,87 +93,108 @@ void PAJ7620U::selectRegisterBank(bank_e bank)
 {
   switch (bank) {
     case BANK0:
-      writeRegister(PAJ7620_REGITER_BANK_SEL, PAJ7620_BANK0);
+      writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0);
       break;
     case BANK1:
-      writeRegister(PAJ7620_REGITER_BANK_SEL, PAJ7620_BANK1);
+      writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK1);
       break;
     default:
       break;
   }
 }
 
+
+/***************************************************************
+****************************************************************/
+bool PAJ7620U::isPAJ7620UDevice()
+{
+  uint8_t data0 = 0, data1 = 0;
+
+  // Device ID is stored in BANK0
+  selectRegisterBank(BANK0);
+
+  // Read PartID LSB[7:0] from Bank0, 0x00 - Should read 0x20
+  // Read PartID MSB[15:8] from Bank0, 0x01 - Should read 0x76
+  readRegister(0, 1, &data0);
+  readRegister(1, 1, &data1);
+
+  // Test if part ID is corect for PAJ7620U2
+  //  See: PAJ7620U2 datasheet page 24 - 5.16 Chip/Version ID
+  if ( (data0 != 0x20 ) || (data1 != 0x76) )
+    { return false; }
+
+  return true;
+}
+
+
 /****************************************************************
-   Function Name: paj7620Init
-   Description:  PAJ7620 REG INIT
+****************************************************************/
+void PAJ7620U::initializeDeviceSettings()
+{
+  selectRegisterBank(BANK0);  // Config starts in BANK0
+
+  // Initialize chip configuration
+  for (int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
+  {
+    writeRegister(initRegisterArray[i][0], initRegisterArray[i][1]);
+  }
+}
+
+
+/****************************************************************
+   Function Name: begin
+   Description:  PAJ7620 device I2C connect and initialize
    Parameters: none
    Return: error code; success: return 0
 ****************************************************************/
 uint8_t PAJ7620U::begin()
 {
-  //Near_normal_mode_V5_6.15mm_121017 for 940nm
-  int i = 0;
-  uint8_t error;
-  uint8_t data0 = 0, data1 = 0;
-  //wakeup the sensor
-  delayMicroseconds(700); //Wait 700us for PAJ7620U2 to stabilize
+  Wire.begin();                       // Initialize I2C bus
+  selectRegisterBank(BANK0);          // Default operations on BANK0
 
-  Wire.begin();
-
-  // Serial.println("INIT SENSOR...");
-
-  selectRegisterBank(BANK0);
-  selectRegisterBank(BANK0);
-
-  error = readRegister(0, 1, &data0);
-  if (error)
-  {
-    return error;
-  }
-  error = readRegister(1, 1, &data1);
-  if (error)
-  {
-    return error;
-  }
-  // Serial.print("Addr0 =");
-  // Serial.print(data0 , HEX);
-  // Serial.print(",  Addr1 =");
-  // Serial.println(data1 , HEX);
-
-  if ( (data0 != 0x20 ) || (data1 != 0x76) )
-  {
-    return 0xff;
-  }
-  if ( data0 == 0x20 )
-  {
-    // Serial.println("wake-up finish.");
+  if( !isPAJ7620UDevice() ) {
+    return 0xFF;                      // Return error code - wrong device found
   }
 
-  for (i = 0; i < INIT_REG_ARRAY_SIZE; i++)
-  {
-    writeRegister(initRegisterArray[i][0], initRegisterArray[i][1]);
-  }
+  initializeDeviceSettings();         // Set all config registers
 
-  selectRegisterBank(BANK0);  //gesture flage reg in Bank0
+  // WARNING: Failing to select BANK0 here will make the device not work
+  //  No, I don't know why - Crandall
+  selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
 
-  // Serial.println("Paj7620 initialize register finished.");
   return 0;
 }
 
 
+/****************************************************************
+****************************************************************/
 void PAJ7620U::cancelGesture()
 {
-    // Read register  to clear spurious interrupts
+    // Read register to clear spurious interrupts
     uint8_t data = 0, data1 = 0;
     readRegister(0x43, 1, &data);
     readRegister(0x44, 1, &data1);
 }
 
+
+/****************************************************************
+****************************************************************/
+int PAJ7620U::getWaveCount()
+{
+  uint8_t waveCount = 0;
+  readRegister(PAJ7620_ADDR_WAVE_COUNT, 1, &waveCount);
+  waveCount &= 0x0F;
+  return waveCount;
+}
+
+/****************************************************************
+****************************************************************/
 int PAJ7620U::readGesture()
 {
   uint8_t data = 0, data1 = 0, error;
 
   error = readRegister(0x43, 1, &data);        // Read Bank_0_Reg_0x43/0x44 for gesture result.
+  Serial.println("Data read: " + String(data));
   if (error)
   {
     return GES_NONE;

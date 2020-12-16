@@ -141,10 +141,10 @@ void PAJ7620U::initializeDeviceSettings()
         uint16_t word = initRegisterArray[i];
     #endif
 
-		uint8_t high, low;
-		high = (word & 0xFF00) >> 8;
-		low = (word & 0x00FF);
-		writeRegister(high, low);
+		uint8_t address, value;
+		address = (word & 0xFF00) >> 8;
+		value = (word & 0x00FF);
+		writeRegister(address, value);
   }
 }
 

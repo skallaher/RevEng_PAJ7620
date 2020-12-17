@@ -138,7 +138,7 @@ void PAJ7620U::initializeDeviceSettings()
     #ifdef PROGMEM_COMPATIBLE
 		  uint16_t word = pgm_read_word(&initRegisterArray[i]);
     #else
-        uint16_t word = initRegisterArray[i];
+      uint16_t word = initRegisterArray[i];
     #endif
 
 		uint8_t address, value;
@@ -191,7 +191,7 @@ int PAJ7620U::getWaveCount()
 {
   uint8_t waveCount = 0;
   readRegister(PAJ7620_ADDR_WAVE_COUNT, 1, &waveCount);
-  waveCount &= 0x0F;
+  waveCount &= 0x0F;      // Count is [3:0] bits only 0..15
   return waveCount;
 }
 

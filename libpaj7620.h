@@ -1,14 +1,18 @@
 /*
    Copyright (c) 2015 seeed technology inc.
    Website    : www.seeed.cc
-   Author     : Wuruibin
+   Author     : Wuruibin & Xiangnan
    Modified Time: June 2015
 
    2017 - Modified by MarcFinns to encapsulate in class without global variables
+   2020 - PROGMEM code adapted from Jaycar-Electronics' work
    2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
+   
 
    Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
   				move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+
+   Version: 1.2
 
    The MIT License (MIT)
 
@@ -48,7 +52,7 @@
 
 /* 
   Direction definitions 
-  - Used as return value from gesture read
+  - Used as return value from gesture read method
  */
 enum {
   GES_NONE,
@@ -70,8 +74,6 @@ typedef enum {
   BANK0 = 0,
   BANK1,
 } bank_e;
-
-
 
 /*
   Notice: When you want to recognize the Forward/Backward gestures, your gestures' reaction time must less than GES_ENTRY_TIME(0.8s).

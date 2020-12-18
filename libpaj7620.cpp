@@ -222,12 +222,35 @@ int PAJ7620U::getWaveCount()
   return waveCount;
 }
 
+
+/****************************************************************
+****************************************************************/
+gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
+{
+  uint8_t data1 = 0;
+  gesture result = initialGesture;
+
+  delay(gestureEntryTime);
+  getGesturesReg0(&data1);
+  if (data1 == GES_FORWARD_FLAG)
+  {
+    delay(gestureExitTime);
+    result = GES_FORWARD;
+  }
+  else if (data1 == GES_BACKWARD_FLAG)
+  {
+    delay(gestureExitTime);
+    result = GES_BACKWARD;
+  }
+  return result;
+}
+
 /****************************************************************
 ****************************************************************/
 int PAJ7620U::readGesture()
 {
   uint8_t data = 0, data1 = 0, error = 0;
-  gestures result = GES_NONE;
+  gesture result = GES_NONE;
 
   error = getGesturesReg0(&data);
   if (error)
@@ -239,79 +262,19 @@ int PAJ7620U::readGesture()
     switch (data)
     {
       case GES_RIGHT_FLAG:
-        delay(gestureEntryTime);
-        getGesturesReg0(&data1);
-        if (data1 == GES_FORWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_FORWARD;
-        }
-        else if (data1 == GES_BACKWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_BACKWARD;
-        }
-        else
-        {
-          result = GES_RIGHT;
-        }
+        result = forwardBackwardGestureCheck(GES_RIGHT);
         break;
 
       case GES_LEFT_FLAG:
-        delay(gestureEntryTime);
-        getGesturesReg0(&data1);
-        if (data1 == GES_FORWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_FORWARD;
-        }
-        else if (data1 == GES_BACKWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_BACKWARD;
-        }
-        else
-        {
-          result = GES_LEFT;
-        }
+        result = forwardBackwardGestureCheck(GES_LEFT);
         break;
 
       case GES_UP_FLAG:
-        delay(gestureEntryTime);
-        getGesturesReg0(&data1);
-        if (data1 == GES_FORWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_FORWARD;
-        }
-        else if (data1 == GES_BACKWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_BACKWARD;
-        }
-        else
-        {
-          result = GES_UP;
-        }
+        result = forwardBackwardGestureCheck(GES_UP);
         break;
 
       case GES_DOWN_FLAG:
-        delay(gestureEntryTime);
-        getGesturesReg0(&data1);
-        if (data1 == GES_FORWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_FORWARD;
-        }
-        else if (data1 == GES_BACKWARD_FLAG)
-        {
-          delay(gestureExitTime);
-          result = GES_BACKWARD;
-        }
-        else
-        {
-          result = GES_DOWN;
-        }
+        result = forwardBackwardGestureCheck(GES_DOWN);
         break;
 
       case GES_FORWARD_FLAG:
@@ -333,11 +296,9 @@ int PAJ7620U::readGesture()
         break;
 
       default:
-        getGesturesReg1(&data1);
+        getGesturesReg1(&data1);      // Reg1 (0x44) has wave flag
         if (data1 == GES_WAVE_FLAG)
-        {
-          result = GES_WAVE;
-        }
+          { result = GES_WAVE; }
         break;
     }
   }

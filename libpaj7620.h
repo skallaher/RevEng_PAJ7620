@@ -54,7 +54,7 @@
   Direction definitions 
   - Used as return value from gesture read method
  */
-enum gestures {
+enum gesture {
   GES_NONE,
   GES_LEFT,
   GES_RIGHT,
@@ -399,6 +399,8 @@ class PAJ7620U
     void selectRegisterBank(bank_e bank);
 	uint8_t getGesturesReg0(uint8_t data[]);
 	uint8_t getGesturesReg1(uint8_t data[]);
+
+	gesture forwardBackwardGestureCheck(gesture initialGesture);
 
     bool isPAJ7620UDevice();
     void initializeDeviceSettings();

@@ -393,6 +393,9 @@ class PAJ7620U
     int getWaveCount();
 
   private:
+	int gesture_entry_time;
+	int gesture_exit_time;
+
     uint8_t writeRegister(uint8_t addr, uint8_t cmd);
     uint8_t readRegister(uint8_t addr, uint8_t qty, uint8_t data[]);
     void selectRegisterBank(bank_e bank);

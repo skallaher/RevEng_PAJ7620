@@ -54,7 +54,7 @@
   Direction definitions 
   - Used as return value from gesture read method
  */
-enum {
+enum gestures {
   GES_NONE,
   GES_LEFT,
   GES_RIGHT,
@@ -65,7 +65,7 @@ enum {
   GES_CLOCKWISE,
   GES_CNTRCLOCKWISE,
   GES_WAVE
-} GESTURES;
+};
 
 /*
   bank_e used to for selecting PAJ7620 memory bank to read/write from
@@ -75,12 +75,6 @@ typedef enum {
   BANK1,
 } bank_e;
 
-/*
-  Notice: When you want to recognize the Forward/Backward gestures, your gestures' reaction time must less than GES_ENTRY_TIME(0.8s).
-        You also can adjust the reaction time according to the actual circumstance.
-*/
-#define GES_ENTRY_TIME		0 // 150// 200 // 800				// When you want to recognize the Forward/Backward gestures, your gestures' reaction time must less than GES_ENTRY_TIME(0.8s). 
-#define GES_QUIT_TIME		200 //300 // 1000
 
 // DEVICE'S I2C ID - defined by manufacturer
 #define PAJ7620_I2C_BUS_ADDR  0x73
@@ -109,6 +103,8 @@ typedef enum {
 #define PAJ7620_ADDR_PS_APPROACH_STATE    (PAJ7620_ADDR_BASE + 0x6B)  // R
 #define PAJ7620_ADDR_PS_RAW_DATA          (PAJ7620_ADDR_BASE + 0x6C)  // R
 #define PAJ7620_ADDR_WAVE_COUNT           (PAJ7620_ADDR_BASE + 0xB7)  // R
+#define PAJ7620_ADDR_GES_RESULT_0		  (PAJ7620_ADDR_BASE + 0x43)  // R
+#define PAJ7620_ADDR_GES_RESULT_1		  (PAJ7620_ADDR_BASE + 0x44)  // R
 
 // REGISTER BANK 1
 #define PAJ7620_ADDR_PS_GAIN              (PAJ7620_ADDR_BASE + 0x44)  // RW
@@ -391,14 +387,19 @@ class PAJ7620U
     int readGesture();
     void cancelGesture();
     int getWaveCount();
+	void setGestureEntryTime(unsigned long newGestureEntryTime);
+	void setGestureExitTime(unsigned long newGestureExitTime);
 
   private:
-	int gesture_entry_time;
-	int gesture_exit_time;
+	unsigned long gestureEntryTime;
+	unsigned long gestureExitTime;
 
     uint8_t writeRegister(uint8_t addr, uint8_t cmd);
     uint8_t readRegister(uint8_t addr, uint8_t qty, uint8_t data[]);
     void selectRegisterBank(bank_e bank);
+	uint8_t getGesturesReg0(uint8_t data[]);
+	uint8_t getGesturesReg1(uint8_t data[]);
+
     bool isPAJ7620UDevice();
     void initializeDeviceSettings();
 };

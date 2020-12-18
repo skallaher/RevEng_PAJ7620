@@ -84,6 +84,15 @@ uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 
 
 /****************************************************************
+****************************************************************/
+uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
+  { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
+
+uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
+  { return readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, data); }
+
+
+/****************************************************************
    Function Name: selectRegisterBank
    Description:  PAJ7620 select register bank
    Parameters: BANK0, BANK1
@@ -159,8 +168,8 @@ uint8_t PAJ7620U::begin()
 {
   // Reasonable timing delay values to make algorithm insensitive to
   //  hand entry and exit moves before and after detecting a gesture
-  gesture_entry_time = 0;
-  gesture_exit_time = 200;
+  gestureEntryTime = 0;
+  gestureExitTime = 200;
 
   Wire.begin();                       // Initialize I2C bus
   selectRegisterBank(BANK0);          // Default operations on BANK0
@@ -178,6 +187,19 @@ uint8_t PAJ7620U::begin()
   return 0;
 }
 
+/****************************************************************
+****************************************************************/
+void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
+{
+  gestureEntryTime = newGestureEntryTime;
+}
+
+/****************************************************************
+****************************************************************/
+void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
+{
+  gestureExitTime = newGestureExitTime;
+}
 
 /****************************************************************
 ****************************************************************/
@@ -185,8 +207,8 @@ void PAJ7620U::cancelGesture()
 {
     // Read register to clear spurious interrupts
     uint8_t data = 0, data1 = 0;
-    readRegister(0x43, 1, &data);
-    readRegister(0x44, 1, &data1);
+    readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, &data);
+    readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, &data1);
 }
 
 
@@ -204,137 +226,120 @@ int PAJ7620U::getWaveCount()
 ****************************************************************/
 int PAJ7620U::readGesture()
 {
-  uint8_t data = 0, data1 = 0, error;
+  uint8_t data = 0, data1 = 0, error = 0;
+  gestures result = GES_NONE;
 
-  error = readRegister(0x43, 1, &data);        // Read Bank_0_Reg_0x43/0x44 for gesture result.
-  // Serial.println("Data read: " + String(data));
+  error = getGesturesReg0(&data);
   if (error)
   {
     return GES_NONE;
   }
   else
   {
-    switch (data)                   // When different gestures be detected, the variable 'data' will be set to different values by paj7620ReadReg(0x43, 1, &data).
+    switch (data)
     {
       case GES_RIGHT_FLAG:
-        delay(gesture_entry_time);
-        readRegister(0x43, 1, &data);
-        if (data == GES_FORWARD_FLAG)
+        delay(gestureEntryTime);
+        getGesturesReg0(&data1);
+        if (data1 == GES_FORWARD_FLAG)
         {
-          // Serial.println("Forward");
-          delay(gesture_exit_time);
-          return GES_FORWARD;
+          delay(gestureExitTime);
+          result = GES_FORWARD;
         }
-        else if (data == GES_BACKWARD_FLAG)
+        else if (data1 == GES_BACKWARD_FLAG)
         {
-          // Serial.println("Backward");
-          delay(gesture_exit_time);
-          return GES_BACKWARD;
+          delay(gestureExitTime);
+          result = GES_BACKWARD;
         }
         else
         {
-          // Serial.println("Right");
-          return GES_RIGHT;
+          result = GES_RIGHT;
         }
         break;
 
       case GES_LEFT_FLAG:
-        delay(gesture_entry_time);
-        readRegister(0x43, 1, &data);
-        if (data == GES_FORWARD_FLAG)
+        delay(gestureEntryTime);
+        getGesturesReg0(&data1);
+        if (data1 == GES_FORWARD_FLAG)
         {
-          // Serial.println("Forward");
-          delay(gesture_exit_time);
-          return GES_FORWARD;
+          delay(gestureExitTime);
+          result = GES_FORWARD;
         }
-        else if (data == GES_BACKWARD_FLAG)
+        else if (data1 == GES_BACKWARD_FLAG)
         {
-          // Serial.println("Backward");
-          delay(gesture_exit_time);
-          return GES_BACKWARD;
+          delay(gestureExitTime);
+          result = GES_BACKWARD;
         }
         else
         {
-          // Serial.println("Left");
-          return GES_LEFT;
+          result = GES_LEFT;
         }
         break;
 
       case GES_UP_FLAG:
-        delay(gesture_entry_time);
-        readRegister(0x43, 1, &data);
-        if (data == GES_FORWARD_FLAG)
+        delay(gestureEntryTime);
+        getGesturesReg0(&data1);
+        if (data1 == GES_FORWARD_FLAG)
         {
-          // Serial.println("Forward");
-          delay(gesture_exit_time);
-          return GES_FORWARD;
+          delay(gestureExitTime);
+          result = GES_FORWARD;
         }
-        else if (data == GES_BACKWARD_FLAG)
+        else if (data1 == GES_BACKWARD_FLAG)
         {
-          // Serial.println("Backward");
-          delay(gesture_exit_time);
-          return GES_BACKWARD;
+          delay(gestureExitTime);
+          result = GES_BACKWARD;
         }
         else
         {
-          // Serial.println("Up");
-          return GES_UP;
+          result = GES_UP;
         }
         break;
 
       case GES_DOWN_FLAG:
-        delay(gesture_entry_time);
-        readRegister(0x43, 1, &data);
-        if (data == GES_FORWARD_FLAG)
+        delay(gestureEntryTime);
+        getGesturesReg0(&data1);
+        if (data1 == GES_FORWARD_FLAG)
         {
-          // Serial.println("Forward");
-          delay(gesture_exit_time);
-          return GES_FORWARD;
+          delay(gestureExitTime);
+          result = GES_FORWARD;
         }
-        else if (data == GES_BACKWARD_FLAG)
+        else if (data1 == GES_BACKWARD_FLAG)
         {
-          // Serial.println("Backward");
-          delay(gesture_exit_time);
-          return GES_BACKWARD;
+          delay(gestureExitTime);
+          result = GES_BACKWARD;
         }
         else
         {
-          // Serial.println("Down");
-          return GES_DOWN;
+          result = GES_DOWN;
         }
         break;
 
       case GES_FORWARD_FLAG:
-        // Serial.println("Forward");
-        delay(gesture_exit_time);
-        return GES_FORWARD;
+        delay(gestureExitTime);
+        result = GES_FORWARD;
         break;
 
       case GES_BACKWARD_FLAG:
-        // Serial.println("Backward");
-        delay(gesture_exit_time);
-        return GES_BACKWARD;
+        delay(gestureExitTime);
+        result = GES_BACKWARD;
         break;
 
       case GES_CLOCKWISE_FLAG:
-        // Serial.println("Clockwise");
-        return GES_CLOCKWISE;
+        result = GES_CLOCKWISE;
         break;
 
       case GES_COUNT_CLOCKWISE_FLAG:
-        // Serial.println("anti-clockwise");
-        return GES_CNTRCLOCKWISE;
+        result = GES_CNTRCLOCKWISE;
         break;
 
       default:
-        readRegister(0x44, 1, &data1);
+        getGesturesReg1(&data1);
         if (data1 == GES_WAVE_FLAG)
         {
-          // Serial.println("wave");
-          return GES_WAVE;
+          result = GES_WAVE;
         }
         break;
     }
   }
+  return (int)result;
 }
-

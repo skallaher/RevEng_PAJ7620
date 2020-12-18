@@ -5,7 +5,7 @@
    Modified Time: June 2015
    
    2017 - Modified by MarcFinns to encapsulate in class without global variables
-   2020 - PROGMEM code adapted from Jaycar-Electronics' work
+   2020 - PROGMEM code adapted from Jaycar Electronics' work
    2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
    Version 1.2
@@ -34,8 +34,8 @@
    THE SOFTWARE.
 */
 
-#include "libpaj7620.h"
 #include "Arduino.h"
+#include "libpaj7620.h"
 
 
 /****************************************************************
@@ -71,17 +71,17 @@ uint8_t PAJ7620U::begin()
 /****************************************************************
    Function Name: writeRegister
    Description:  PAJ7620 Write reg cmd
-   Parameters: addr:reg address; cmd:function data
+   Parameters: addr:reg address; cmd:data (byte) to write
    Return: error code; success: return 0
 ****************************************************************/
 uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
 {
-  uint8_t result = 0;
-  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission to device
-  Wire.write(addr);                     // send register address
-  Wire.write(cmd);                      // send value to write
-  result = Wire.endTransmission();      // end transmission
-  return result;
+  uint8_t result_code = 0;
+  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
+  Wire.write(addr);                               // send register address
+  Wire.write(cmd);                                // send value to write
+  result_code = Wire.endTransmission();           // end transmission
+  return result_code;
 }
 
 
@@ -95,15 +95,13 @@ uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
 ****************************************************************/
 uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
-  uint8_t error;
+  uint8_t result_code;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
   Wire.write(addr);
-  error = Wire.endTransmission();
+  result_code = Wire.endTransmission();
 
-  if (error)
-  {
-    return error; //return error code
-  }
+  if (result_code)            //return error code - if not zero
+    { return result_code; }
 
   Wire.requestFrom((int)PAJ7620_I2C_BUS_ADDR, (int)qty);
 
@@ -118,10 +116,21 @@ uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 
 
 /****************************************************************
+   Function Name: getGesturesReg0
+   Description:  Read the gestures interrupt vector #0
+   Parameters: &uint8_t for storing value
+   Return: error code (0 means no error)
 ****************************************************************/
 uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
 
+
+/****************************************************************
+   Function Name: getGesturesReg1
+   Description:  Read the gestures interrupt vector #1 (wave gesture)
+   Parameters: &uint8_t for storing value
+   Return: error code (0 means no error)
+****************************************************************/
 uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, data); }
 
@@ -129,24 +138,23 @@ uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
 /****************************************************************
    Function Name: selectRegisterBank
    Description:  PAJ7620 select register bank
-   Parameters: BANK0, BANK1
+   Parameters: BANK0, BANK1 - see bank_e enum
    Return: none
 ****************************************************************/
 void PAJ7620U::selectRegisterBank(bank_e bank)
 {
-  switch (bank) {
-    case BANK0:
-      writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0);
-      break;
-    case BANK1:
-      writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK1);
-      break;
-    default:
-      break;
-  }
+  if( bank == BANK0 )
+    { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0); }
+  else if( bank == BANK1 )
+    { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK1); }
 }
 
+
 /***************************************************************
+   Function Name: isPAJ7620UDevice
+   Description: See if it truly a PAJ7620 at the I2C address by checking its ID
+   Parameters: none
+   Return: true/false
 ****************************************************************/
 bool PAJ7620U::isPAJ7620UDevice()
 {
@@ -168,7 +176,13 @@ bool PAJ7620U::isPAJ7620UDevice()
   return true;
 }
 
+
 /****************************************************************
+   Function Name: initializeDeviceSettings
+   Description: Write settings to enable I2C gesture recognition
+      See header for initRegisterArray definition
+   Parameters: none
+   Return: none
 ****************************************************************/
 void PAJ7620U::initializeDeviceSettings()
 {
@@ -189,31 +203,53 @@ void PAJ7620U::initializeDeviceSettings()
   }
 }
 
+
 /****************************************************************
+   Function Name: setGestureEntryTime
+   Description: User setter for delay on gesture reads used in
+      forwardBackwardGestureCheck()
+   Parameters: unsigned long newGestureEntryTime
+   Return: none
 ****************************************************************/
 void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
 {
   gestureEntryTime = newGestureEntryTime;
 }
 
+
 /****************************************************************
+   Function Name: setGestureExitTime
+   Description: User setter for delay after gesture reads to 
+      allow the person to withdraw their hand and not cause a second
+      gesture event to be thrown. 
+   Parameters: unsigned long newGestureExitTime
+   Return: none
 ****************************************************************/
 void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
 {
   gestureExitTime = newGestureExitTime;
 }
 
+
 /****************************************************************
+   Function Name: cancelGesture
+   Description: API call to clear current gesture interrupt vectors
+   Parameters: none
+   Return: none
 ****************************************************************/
 void PAJ7620U::cancelGesture()
 {
-    // Read register to clear spurious interrupts
     uint8_t data = 0, data1 = 0;
-    readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, &data);
-    readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, &data1);
+    getGesturesReg0(&data);
+    getGesturesReg1(&data1);
 }
 
+
 /****************************************************************
+   Function Name: getWaveCount
+   Description: Public API to get current count of waves by user
+   Parameters: none
+   Return: int quantity of waves (passes) over the sensor
 ****************************************************************/
 int PAJ7620U::getWaveCount()
 {
@@ -223,7 +259,13 @@ int PAJ7620U::getWaveCount()
   return waveCount;
 }
 
+
 /****************************************************************
+   Function Name: forwardBackwardGestureCheck
+   Description: Used to double check a lateral gesture (up, down, left, right)
+     to see if it was actually a vertical gesture (forward, backward)
+   Parameters: gesture initialGesture
+   Return: gesture - the double checked gesture
 ****************************************************************/
 gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
 {
@@ -245,15 +287,21 @@ gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
   return result;
 }
 
+
 /****************************************************************
+   Function Name: readGesture
+   Description: Read the latest gesture from the sensor
+     -- Clears interrupt vector of gestures upon read
+   Parameters: none
+   Return: int (gesture enum) - gesture found or no gesture found (0)
 ****************************************************************/
 int PAJ7620U::readGesture()
 {
-  uint8_t data = 0, data1 = 0, error = 0;
+  uint8_t data = 0, data1 = 0, readCode = 0;
   gesture result = GES_NONE;
 
-  error = getGesturesReg0(&data);
-  if (error)
+  readCode = getGesturesReg0(&data);
+  if (readCode)
   {
     return GES_NONE;
   }

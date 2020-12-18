@@ -93,9 +93,9 @@ void loop()
         break;
       }
 
-    case GES_CNTRCLOCKWISE:
+    case GES_ANTICLOCKWISE:
       {
-        Serial.print(" GES_CNTRCLOCKWISE");
+        Serial.print(" GES_ANTICLOCKWISE");
         break;
       }
 
@@ -106,12 +106,15 @@ void loop()
       }
     case GES_NONE:
       {
-        Serial.print(" GES_NONE");
+        // Serial.print(" GES_NONE");
         break;
       }
   }
 
-  Serial.println(", Code: " + String(gesture));
+  if( gesture != GES_NONE )
+  {
+    Serial.println(", Code: " + String(gesture));
+  }
 
   delay(100);
 }

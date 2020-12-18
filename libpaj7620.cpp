@@ -291,8 +291,8 @@ int PAJ7620U::readGesture()
         result = GES_CLOCKWISE;
         break;
 
-      case GES_COUNT_CLOCKWISE_FLAG:
-        result = GES_CNTRCLOCKWISE;
+      case GES_ANTI_CLOCKWISE_FLAG:
+        result = GES_ANTICLOCKWISE;
         break;
 
       default:

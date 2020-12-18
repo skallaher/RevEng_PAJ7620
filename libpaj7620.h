@@ -77,7 +77,11 @@ typedef enum {
 
 
 // DEVICE'S I2C ID - defined by manufacturer
-#define PAJ7620_I2C_BUS_ADDR  0x73
+#define PAJ7620_I2C_BUS_ADDR  	0x73
+
+// Device's hard coded ID values
+#define PAJ7620_PART_ID_LSB		0x20
+#define PAJ7620_PART_ID_MSB		0x76
 
 // Helper macro to bit shift defines
 #define BIT(x)  1 << x
@@ -92,7 +96,9 @@ typedef enum {
 #define PAJ7620_REGISTER_BANK_SEL         (PAJ7620_ADDR_BASE + 0xEF)  // W
 
 // REGISTER BANK 0
-#define PAJ7620_ADDR_SUSPEND_CMD          (PAJ7620_ADDR_BASE + 0x3)   // W
+#define PAJ7620_ADDR_PART_ID_0			  (PAJ7620_ADDR_BASE + 0x00)  // R
+#define PAJ7620_ADDR_PART_ID_1			  (PAJ7620_ADDR_BASE + 0x01)  // R
+#define PAJ7620_ADDR_SUSPEND_CMD          (PAJ7620_ADDR_BASE + 0x03)  // W
 #define PAJ7620_ADDR_GES_PS_DET_MASK_0    (PAJ7620_ADDR_BASE + 0x41)  // RW
 #define PAJ7620_ADDR_GES_PS_DET_MASK_1    (PAJ7620_ADDR_BASE + 0x42)  // RW
 #define PAJ7620_ADDR_GES_PS_DET_FLAG_0    (PAJ7620_ADDR_BASE + 0x43)  // R

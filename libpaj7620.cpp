@@ -1,10 +1,14 @@
 /*
    Copyright (c) 2015 seeed technology inc.
    Website    : www.seeed.cc
-   Author     : Wuruibin
+   Author     : Wuruibin & Xiangnan
    Modified Time: June 2015
    
    2017 - Modified by MarcFinns to encapsulate in class without global variables
+   2020 - PROGMEM code adapted from Jaycar-Electronics' work
+   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
+
+   Version 1.2
    
    Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
   				move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
@@ -32,6 +36,36 @@
 
 #include "libpaj7620.h"
 #include "Arduino.h"
+
+
+/****************************************************************
+   Function Name: begin
+   Description:  PAJ7620 device I2C connect and initialize
+   Parameters: none
+   Return: error code; success: return 0
+****************************************************************/
+uint8_t PAJ7620U::begin()
+{
+  // Reasonable timing delay values to make algorithm insensitive to
+  //  hand entry and exit moves before and after detecting a gesture
+  gestureEntryTime = 0;
+  gestureExitTime = 200;
+
+  Wire.begin();                       // Initialize I2C bus
+  selectRegisterBank(BANK0);          // Default operations on BANK0
+
+  if( !isPAJ7620UDevice() ) {
+    return 0xFF;                      // Return error code - wrong device found
+  }
+
+  initializeDeviceSettings();         // Set all config registers
+
+  // WARNING: Failing to select BANK0 here will make the device not work
+  //  No, I don't know why - Crandall
+  selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
+
+  return 0;
+}
 
 
 /****************************************************************
@@ -112,7 +146,6 @@ void PAJ7620U::selectRegisterBank(bank_e bank)
   }
 }
 
-
 /***************************************************************
 ****************************************************************/
 bool PAJ7620U::isPAJ7620UDevice()
@@ -124,17 +157,16 @@ bool PAJ7620U::isPAJ7620UDevice()
 
   // Read PartID LSB[7:0] from Bank0, 0x00 - Should read 0x20
   // Read PartID MSB[15:8] from Bank0, 0x01 - Should read 0x76
-  readRegister(0, 1, &data0);
-  readRegister(1, 1, &data1);
+  readRegister(PAJ7620_ADDR_PART_ID_0, 1, &data0);
+  readRegister(PAJ7620_ADDR_PART_ID_1, 1, &data1);
 
   // Test if part ID is corect for PAJ7620U2
   //  See: PAJ7620U2 datasheet page 24 - 5.16 Chip/Version ID
-  if ( (data0 != 0x20 ) || (data1 != 0x76) )
+  if ( (data0 != PAJ7620_PART_ID_LSB ) || (data1 != PAJ7620_PART_ID_MSB) )
     { return false; }
 
   return true;
 }
-
 
 /****************************************************************
 ****************************************************************/
@@ -155,36 +187,6 @@ void PAJ7620U::initializeDeviceSettings()
 		value = (word & 0x00FF);
 		writeRegister(address, value);
   }
-}
-
-
-/****************************************************************
-   Function Name: begin
-   Description:  PAJ7620 device I2C connect and initialize
-   Parameters: none
-   Return: error code; success: return 0
-****************************************************************/
-uint8_t PAJ7620U::begin()
-{
-  // Reasonable timing delay values to make algorithm insensitive to
-  //  hand entry and exit moves before and after detecting a gesture
-  gestureEntryTime = 0;
-  gestureExitTime = 200;
-
-  Wire.begin();                       // Initialize I2C bus
-  selectRegisterBank(BANK0);          // Default operations on BANK0
-
-  if( !isPAJ7620UDevice() ) {
-    return 0xFF;                      // Return error code - wrong device found
-  }
-
-  initializeDeviceSettings();         // Set all config registers
-
-  // WARNING: Failing to select BANK0 here will make the device not work
-  //  No, I don't know why - Crandall
-  selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
-
-  return 0;
 }
 
 /****************************************************************
@@ -211,7 +213,6 @@ void PAJ7620U::cancelGesture()
     readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, &data1);
 }
 
-
 /****************************************************************
 ****************************************************************/
 int PAJ7620U::getWaveCount()
@@ -221,7 +222,6 @@ int PAJ7620U::getWaveCount()
   waveCount &= 0x0F;      // Count is [3:0] bits - values in 0..15
   return waveCount;
 }
-
 
 /****************************************************************
 ****************************************************************/

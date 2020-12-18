@@ -65,7 +65,7 @@ enum {
   GES_CLOCKWISE,
   GES_CNTRCLOCKWISE,
   GES_WAVE
-};
+} GESTURES;
 
 /*
   bank_e used to for selecting PAJ7620 memory bank to read/write from

@@ -202,7 +202,7 @@ int PAJ7620U::readGesture()
   uint8_t data = 0, data1 = 0, error;
 
   error = readRegister(0x43, 1, &data);        // Read Bank_0_Reg_0x43/0x44 for gesture result.
-  Serial.println("Data read: " + String(data));
+  // Serial.println("Data read: " + String(data));
   if (error)
   {
     return GES_NONE;

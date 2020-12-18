@@ -297,11 +297,11 @@ gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
 ****************************************************************/
 int PAJ7620U::readGesture()
 {
-  uint8_t data = 0, data1 = 0, error = 0;
+  uint8_t data = 0, data1 = 0, readCode = 0;
   gesture result = GES_NONE;
 
-  error = getGesturesReg0(&data);
-  if (error)
+  readCode = getGesturesReg0(&data);
+  if (readCode)
   {
     return GES_NONE;
   }

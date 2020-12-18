@@ -15,6 +15,7 @@
 bool isr = false;
 PAJ7620U sensor = PAJ7620U();
 
+// ***************************************************************************
 void setup()
 {
   uint8_t error = 0;
@@ -22,13 +23,13 @@ void setup()
   // Set interrupt pin as input
   pinMode(INTERRUPT_PIN, INPUT);
 
-  Serial.begin(250000);
+  Serial.begin(115200);
   Serial.println("\nPAJ7620U2 TEST DEMO: Recognize 9 gestures.");
 
   error = sensor.begin();			// initialize Paj7620 registers
   if (error)
   {
-    Serial.print("INIT ERROR,CODE:");
+    Serial.print("INIT ERROR, CODE: ");
     Serial.println(error);
   }
   else
@@ -40,6 +41,8 @@ void setup()
   attachInterrupt(INTERRUPT_PIN, interruptRoutine, FALLING);
 }
 
+
+// ***************************************************************************
 void loop()
 {
 

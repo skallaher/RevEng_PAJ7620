@@ -5,7 +5,7 @@
    Modified Time: June 2015
    
    2017 - Modified by MarcFinns to encapsulate in class without global variables
-   2020 - PROGMEM code adapted from Jaycar-Electronics' work
+   2020 - PROGMEM code adapted from Jaycar Electronics' work
    2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
    Version 1.2
@@ -124,6 +124,7 @@ uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
 
+
 /****************************************************************
    Function Name: getGesturesReg1
    Description:  Read the gestures interrupt vector #1 (wave gesture)
@@ -147,6 +148,7 @@ void PAJ7620U::selectRegisterBank(bank_e bank)
   else if( bank == BANK1 )
     { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK1); }
 }
+
 
 /***************************************************************
    Function Name: isPAJ7620UDevice
@@ -174,6 +176,7 @@ bool PAJ7620U::isPAJ7620UDevice()
   return true;
 }
 
+
 /****************************************************************
    Function Name: initializeDeviceSettings
    Description: Write settings to enable I2C gesture recognition
@@ -200,6 +203,7 @@ void PAJ7620U::initializeDeviceSettings()
   }
 }
 
+
 /****************************************************************
    Function Name: setGestureEntryTime
    Description: User setter for delay on gesture reads used in
@@ -211,6 +215,7 @@ void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
 {
   gestureEntryTime = newGestureEntryTime;
 }
+
 
 /****************************************************************
    Function Name: setGestureExitTime
@@ -225,6 +230,7 @@ void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
   gestureExitTime = newGestureExitTime;
 }
 
+
 /****************************************************************
    Function Name: cancelGesture
    Description: API call to clear current gesture interrupt vectors
@@ -237,6 +243,7 @@ void PAJ7620U::cancelGesture()
     getGesturesReg0(&data);
     getGesturesReg1(&data1);
 }
+
 
 /****************************************************************
    Function Name: getWaveCount
@@ -251,6 +258,7 @@ int PAJ7620U::getWaveCount()
   waveCount &= 0x0F;      // Count is [3:0] bits - values in 0..15
   return waveCount;
 }
+
 
 /****************************************************************
    Function Name: forwardBackwardGestureCheck
@@ -278,6 +286,7 @@ gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
   }
   return result;
 }
+
 
 /****************************************************************
    Function Name: readGesture

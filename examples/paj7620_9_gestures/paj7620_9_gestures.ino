@@ -1,5 +1,4 @@
 /*
-
    Author     : MarcFinns
    Modified Time: March 2017
 
@@ -13,10 +12,10 @@
 #include <Wire.h>
 
 // Includes enum definition of GES_* return values from readGesture()
-#include "libpaj7620.h"
+#include "RevEng_PAJ7620.h"
 
 // Create gesture sensor driver object
-PAJ7620U sensor = PAJ7620U();
+RevEng_PAJ7620U sensor = RevEng_PAJ7620U();
 
 
 // *********************************************************************
@@ -38,6 +37,9 @@ void setup()
   {
     Serial.println("PAJ7620U2 init: OK");
   }
+
+  sensor.setGestureExitTime(0);
+  sensor.setGestureEntryTime(0);
 
   Serial.println("Please input your gestures:\n");
 }

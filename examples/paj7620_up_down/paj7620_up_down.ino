@@ -12,10 +12,10 @@
 #include <Wire.h>
 
 // Includes enum definition of GES_* return values from readGesture()
-#include "libpaj7620.h"
+#include "RevEng_PAJ7620.h"
 
 // Create gesture sensor driver object
-PAJ7620U sensor = PAJ7620U();
+RevEng_PAJ7620U sensor = RevEng_PAJ7620U();
 
 
 // ******************************************************************
@@ -26,7 +26,6 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);     // Configure LED for output
 
   Serial.begin(115200);
-  Serial.println("\nPAJ7620U2 sensor demo: Recognizing 9 gestures.");
 
   error_code = sensor.begin();			// Initialize PAJ7620 registers
                                     // return value of 0 == success
@@ -50,7 +49,7 @@ void loop()
 
   int gesture;
 
-  // Read gesture from sensor - returns a value of GES_* from GESTURES enum in libpaj7620.h
+  // Read gesture from sensor - returns a value of GES_* from GESTURES enum in RevEng_PAJ7620.h
   gesture = sensor.readGesture();
 
   if (gesture == GES_UP)

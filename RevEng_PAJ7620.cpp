@@ -35,7 +35,7 @@
 */
 
 #include "Arduino.h"
-#include "libpaj7620.h"
+#include "RevEng_PAJ7620.h"
 
 
 /****************************************************************
@@ -44,13 +44,14 @@
    Parameters: none
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t PAJ7620U::begin()
+uint8_t RevEng_PAJ7620U::begin()
 {
   // Reasonable timing delay values to make algorithm insensitive to
   //  hand entry and exit moves before and after detecting a gesture
   gestureEntryTime = 0;
   gestureExitTime = 200;
 
+  delayMicroseconds(700);	            // Wait 700us for PAJ7620U2 to stabilize
   Wire.begin();                       // Initialize I2C bus
   selectRegisterBank(BANK0);          // Default operations on BANK0
 
@@ -74,7 +75,7 @@ uint8_t PAJ7620U::begin()
    Parameters: addr:reg address; cmd:data (byte) to write
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
+uint8_t RevEng_PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
 {
   uint8_t result_code = 0;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
@@ -93,7 +94,7 @@ uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
            data[]:storage memory start address
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
+uint8_t RevEng_PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
   uint8_t result_code;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
@@ -121,7 +122,7 @@ uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
+uint8_t RevEng_PAJ7620U::getGesturesReg0(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
 
 
@@ -131,7 +132,7 @@ uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
+uint8_t RevEng_PAJ7620U::getGesturesReg1(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, data); }
 
 
@@ -141,7 +142,7 @@ uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
    Parameters: BANK0, BANK1 - see bank_e enum
    Return: none
 ****************************************************************/
-void PAJ7620U::selectRegisterBank(bank_e bank)
+void RevEng_PAJ7620U::selectRegisterBank(bank_e bank)
 {
   if( bank == BANK0 )
     { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0); }
@@ -156,7 +157,7 @@ void PAJ7620U::selectRegisterBank(bank_e bank)
    Parameters: none
    Return: true/false
 ****************************************************************/
-bool PAJ7620U::isPAJ7620UDevice()
+bool RevEng_PAJ7620U::isPAJ7620UDevice()
 {
   uint8_t data0 = 0, data1 = 0;
 
@@ -184,7 +185,7 @@ bool PAJ7620U::isPAJ7620UDevice()
    Parameters: none
    Return: none
 ****************************************************************/
-void PAJ7620U::initializeDeviceSettings()
+void RevEng_PAJ7620U::initializeDeviceSettings()
 {
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
@@ -204,7 +205,7 @@ void PAJ7620U::initializeDeviceSettings()
 }
 
 
-void PAJ7620U::Disable()
+void RevEng_PAJ7620U::Disable()
 {
   selectRegisterBank(BANK1);
   Serial.println("Supposedly disable operation");
@@ -212,7 +213,7 @@ void PAJ7620U::Disable()
   selectRegisterBank(BANK0);
 }
 
-void PAJ7620U::Enable()
+void RevEng_PAJ7620U::Enable()
 {
   selectRegisterBank(BANK1);
   Serial.println("Supposedly disable enable");
@@ -229,7 +230,7 @@ void PAJ7620U::Enable()
    Parameters: unsigned long newGestureEntryTime
    Return: none
 ****************************************************************/
-void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
+void RevEng_PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
 {
   gestureEntryTime = newGestureEntryTime;
 }
@@ -243,7 +244,7 @@ void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
    Parameters: unsigned long newGestureExitTime
    Return: none
 ****************************************************************/
-void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
+void RevEng_PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
 {
   gestureExitTime = newGestureExitTime;
 }
@@ -255,7 +256,7 @@ void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
    Parameters: none
    Return: none
 ****************************************************************/
-void PAJ7620U::setGameMode()
+void RevEng_PAJ7620U::setGameMode()
 {
     /**
    * Setting normal mode or gaming mode at BANK1 register 0x65/0x66 R_IDLE_TIME[15:0]
@@ -292,7 +293,7 @@ void PAJ7620U::setGameMode()
    Parameters: none
    Return: none
 ****************************************************************/
-void PAJ7620U::cancelGesture()
+void RevEng_PAJ7620U::cancelGesture()
 {
     uint8_t data = 0, data1 = 0;
     getGesturesReg0(&data);
@@ -306,7 +307,7 @@ void PAJ7620U::cancelGesture()
    Parameters: none
    Return: int quantity of waves (passes) over the sensor
 ****************************************************************/
-int PAJ7620U::getWaveCount()
+int RevEng_PAJ7620U::getWaveCount()
 {
   uint8_t waveCount = 0;
   readRegister(PAJ7620_ADDR_WAVE_COUNT, 1, &waveCount);
@@ -319,13 +320,13 @@ int PAJ7620U::getWaveCount()
    Function Name: forwardBackwardGestureCheck
    Description: Used to double check a lateral gesture (up, down, left, right)
      to see if it was actually a vertical gesture (forward, backward)
-   Parameters: gesture initialGesture
-   Return: gesture - the double checked gesture
+   Parameters: Gesture initialGesture
+   Return: Gesture - the double checked gesture
 ****************************************************************/
-gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
+Gesture RevEng_PAJ7620U::forwardBackwardGestureCheck(Gesture initialGesture)
 {
   uint8_t data1 = 0;
-  gesture result = initialGesture;
+  Gesture result = initialGesture;
 
   delay(gestureEntryTime);
   getGesturesReg0(&data1);
@@ -348,12 +349,12 @@ gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
    Description: Read the latest gesture from the sensor
      -- Clears interrupt vector of gestures upon read
    Parameters: none
-   Return: int (gesture enum) - gesture found or no gesture found (0)
+   Return: int (Gesture enum) - gesture found or no gesture found (0)
 ****************************************************************/
-int PAJ7620U::readGesture()
+int RevEng_PAJ7620U::readGesture()
 {
   uint8_t data = 0, data1 = 0, readCode = 0;
-  gesture result = GES_NONE;
+  Gesture result = GES_NONE;
 
   readCode = getGesturesReg0(&data);
   if (readCode)

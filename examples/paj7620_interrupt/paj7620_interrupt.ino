@@ -8,12 +8,12 @@
 */
 
 #include <Wire.h>
-#include "libpaj7620.h"
+#include "RevEng_PAJ7620.h"
 
 #define INTERRUPT_PIN 10
 
 bool isr = false;
-PAJ7620U sensor = PAJ7620U();
+RevEng_PAJ7620U sensor = RevEng_PAJ7620U();
 
 // ***************************************************************************
 void setup()

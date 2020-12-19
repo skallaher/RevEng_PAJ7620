@@ -54,7 +54,7 @@
   Direction definitions 
   - Used as return value from gesture read method
  */
-enum gesture {
+enum Gesture {
   GES_NONE,
   GES_LEFT,
   GES_RIGHT,
@@ -381,9 +381,9 @@ const unsigned short initRegisterArray[] = {
 
 
 /*
-  PAJ7620U Device API class
+  PAJ7620U Device API class - As developed by RevEng Devs
  */
-class PAJ7620U
+class RevEng_PAJ7620U
 {
   public:
     uint8_t begin();
@@ -407,7 +407,7 @@ class PAJ7620U
     uint8_t getGesturesReg0(uint8_t data[]);
     uint8_t getGesturesReg1(uint8_t data[]);
 
-    gesture forwardBackwardGestureCheck(gesture initialGesture);
+    Gesture forwardBackwardGestureCheck(Gesture initialGesture);
 
     bool isPAJ7620UDevice();
     void initializeDeviceSettings();

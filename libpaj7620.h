@@ -80,11 +80,8 @@ typedef enum {
 #define PAJ7620_I2C_BUS_ADDR    0x73
 
 // Device's hard coded ID values
-#define PAJ7620_PART_ID_LSB    0x20
-#define PAJ7620_PART_ID_MSB    0x76
-
-// Helper macro to bit shift defines
-#define BIT(x)  1 << x
+#define PAJ7620_PART_ID_LSB     0x20
+#define PAJ7620_PART_ID_MSB     0x76
 
 // REGISTER DESCRIPTION
 #define PAJ7620_VAL(val, maskbit)    ( val << maskbit )
@@ -396,6 +393,9 @@ class PAJ7620U
     void setGestureEntryTime(unsigned long newGestureEntryTime);
     void setGestureExitTime(unsigned long newGestureExitTime);
     void setGameMode();
+
+	void Disable();
+	void Enable();
 
   private:
     unsigned long gestureEntryTime;

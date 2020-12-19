@@ -204,6 +204,24 @@ void PAJ7620U::initializeDeviceSettings()
 }
 
 
+void PAJ7620U::Disable()
+{
+  selectRegisterBank(BANK1);
+  Serial.println("Supposedly disable operation");
+  writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_DISABLE);
+  selectRegisterBank(BANK0);
+}
+
+void PAJ7620U::Enable()
+{
+  selectRegisterBank(BANK1);
+  Serial.println("Supposedly disable enable");
+  writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_ENABLE);
+  selectRegisterBank(BANK0);
+}
+
+
+
 /****************************************************************
    Function Name: setGestureEntryTime
    Description: User setter for delay on gesture reads used in

@@ -11,7 +11,7 @@
    Version 1.2
    
    Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-  				move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+          move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
 
    The MIT License (MIT)
 
@@ -189,17 +189,17 @@ void PAJ7620U::initializeDeviceSettings()
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
   for (int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
-	{
+  {
     #ifdef PROGMEM_COMPATIBLE
-		  uint16_t word = pgm_read_word(&initRegisterArray[i]);
+      uint16_t word = pgm_read_word(&initRegisterArray[i]);
     #else
       uint16_t word = initRegisterArray[i];
     #endif
 
-		uint8_t address, value;
-		address = (word & 0xFF00) >> 8;
-		value = (word & 0x00FF);
-		writeRegister(address, value);
+    uint8_t address, value;
+    address = (word & 0xFF00) >> 8;
+    value = (word & 0x00FF);
+    writeRegister(address, value);
   }
 }
 
@@ -228,6 +228,43 @@ void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
 void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
 {
   gestureExitTime = newGestureExitTime;
+}
+
+
+/****************************************************************
+   Function Name: setGameMode
+   Description: Put sensor into "game mode" - 240fps instead of 120fps
+   Parameters: none
+   Return: none
+****************************************************************/
+void PAJ7620U::setGameMode()
+{
+    /**
+   * Setting normal mode or gaming mode at BANK1 register 0x65/0x66 R_IDLE_TIME[15:0]
+   * T = 256/System CLK = 32us, 
+   * Ex:
+   * Far Mode: 1 report time = (77+R_IDLE_TIME)T
+   * Report rate 120 fps:
+   * R_IDLE_TIME=1/(120*T)-77=183
+   * 
+   * Report rate 240 fps:
+   * R_IDLE_TIME=1/(240*T)-77=53
+   * 
+   * Near Mode: 1 report time = (112+R_IDLE_TIME)T
+   * 
+   * Report rate 120 fps:
+   * R_IDLE_TIME=1/(120*T)-120=148
+   * 
+   * Report rate 240 fps:
+   * R_IDLE_TIME=1/(240*T)-112=18
+   * 
+   */  
+  // Serial.println("Set up gaming mode.");
+  // paj7620SelectBank(BANK1);  //gesture flage reg in Bank1
+  // paj7620WriteReg(0x65, 0xB7); // far mode 120 fps
+  //paj7620WriteReg(0x65, 0x12);  // near mode 240 fps
+
+  // paj7620SelectBank(BANK0);  //gesture flage reg in Bank0
 }
 
 

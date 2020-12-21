@@ -10,35 +10,34 @@
 #include <Wire.h>
 #include "RevEng_PAJ7620.h"
 
-#define INTERRUPT_PIN 10
+#define INTERRUPT_PIN 2
 
-bool isr = false;
-RevEng_PAJ7620U sensor = RevEng_PAJ7620U();
+volatile bool isr = false;                  // isr == Interrupt Service Routine
+RevEng_PAJ7620 sensor = RevEng_PAJ7620();   // Create gesture sensor API/Object
 
 // ***************************************************************************
 void setup()
 {
   uint8_t error = 0;
 
-  // Set interrupt pin as input
   pinMode(INTERRUPT_PIN, INPUT);
 
   Serial.begin(115200);
-  Serial.println("\nPAJ7620U2 TEST DEMO: Recognize 9 gestures.");
+  Serial.println("\nPAJ7620 Test Demo: Recognize 9 gestures using interrupt callback.");
 
-  error = sensor.begin();			// initialize Paj7620 registers
-  if (error)
+  if( !sensor.begin() )                     // Returns 0 if sensor connect fail
   {
-    Serial.print("INIT ERROR, CODE: ");
-    Serial.println(error);
+    Serial.print("PAJ7620 I2C error - halting");
+    while(true) {}
   }
   else
   {
-    Serial.println("INIT OK");
+    Serial.println("PAJ7620 Init OK.");
   }
-  Serial.println("Please input your gestures:\n");
 
-  attachInterrupt(INTERRUPT_PIN, interruptRoutine, FALLING);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), interruptRoutine, FALLING);
+
+  Serial.println("Please input your gestures:\n");
 }
 
 
@@ -46,14 +45,14 @@ void setup()
 void loop()
 {
 
-  int gesture;
-  if (isr == true)
+  Gesture gesture;                  // Gesture is an enum type from RevEng_PAJ7620.h
+  if (isr == true)                  // See interruptRoutine for where this is set to true
   {
-    long stamp = millis();
-    isr = false;
-    gesture = sensor.readGesture();
+    long stamp = millis();          // Get current time in millis for clocking read times
+    isr = false;                    // Reset ISR flag for next interrupt
+    gesture = sensor.readGesture(); // Read back current gesture (if any) of type Gesture
 
-    switch (gesture) 									// When different gestures be detected, the variable 'data' will be set to different values by paj7620ReadReg(0x43, 1, &data).
+    switch (gesture)
     {
       case GES_FORWARD:
         {
@@ -97,9 +96,9 @@ void loop()
           break;
         }
 
-      case GES_CNTRCLOCKWISE:
+      case GES_ANTICLOCKWISE:
         {
-          Serial.print(" GES_CNTRCLOCKWISE");
+          Serial.print(" GES_ANTICLOCKWISE");
           break;
         }
 
@@ -108,6 +107,7 @@ void loop()
           Serial.print(" GES_WAVE");
           break;
         }
+
       case GES_NONE:
         {
           Serial.print(" GES_NONE");
@@ -115,6 +115,7 @@ void loop()
         }
     }
     Serial.println(", Code: " + String(gesture) + " - Gesture handled in " + String (millis() - stamp) + " ms");
+
     if (isr == true)
     {
       Serial.println(" --> Interrupt during event processing");
@@ -122,10 +123,11 @@ void loop()
   }
 }
 
+// Called then interrupt pin is set high
 void interruptRoutine()
 {
   isr = true;
-  Serial.print("Interrupt!");
+  Serial.print("Interrupt! -- ");
 }
 
 

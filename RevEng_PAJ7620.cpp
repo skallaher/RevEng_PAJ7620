@@ -1,41 +1,43 @@
 /*
-   Copyright (c) 2015 seeed technology inc.
-   Website    : www.seeed.cc
-   Author     : Wuruibin & Xiangnan
-   Modified Time: June 2015
+  RevEng_PAJ7620.cpp
+
+  Copyright (c) 2015 seeed technology inc.
+  Website    : www.seeed.cc
+  Author     : Wuruibin & Xiangnan
+  Modified Time: June 2015
    
-   2017 - Modified by MarcFinns to encapsulate in class without global variables
-   2020 - PROGMEM code adapted from Jaycar Electronics' work
-   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
+  2017 - Modified by MarcFinns to encapsulate in class without global variables
+  2020 - PROGMEM code adapted from Jaycar Electronics' work
+  2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
-   Version 1.2.0
-   
-   Description: This demo can recognize 9 gestures and output the result, including
-          move up, move down, move left, move right, move forward, move backward,
-          circle-clockwise, circle-counter clockwise, and wave.
+  Version: 1.2.0
 
-   The MIT License (MIT)
+  Description: This demo can recognize 9 gestures and output the result,
+        including move up, move down, move left, move right,
+        move forward, move backward, circle-clockwise,
+        circle-anti (counter) clockwise, and wave.
 
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
+  License: The MIT License (MIT)
 
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
-#include "Arduino.h"
 #include "RevEng_PAJ7620.h"
 
 
@@ -43,7 +45,7 @@
    Function Name: begin
    Description:  PAJ7620 device I2C connect and initialize
    Parameters: none
-   Return: error code: 0; success: return 1
+   Return: error code: 0 (false); success: return 1 (true)
 ****************************************************************/
 uint8_t RevEng_PAJ7620::begin()
 {
@@ -269,6 +271,13 @@ void RevEng_PAJ7620::setGestureExitTime(unsigned long newGestureExitTime)
 ****************************************************************/
 // void RevEng_PAJ7620::setGameMode()
 // {
+  /*
+    NOTE: No version of the PixArt documentation says how to enable game mode
+      If you know, please let me know so we can get it added here
+      This code below comes from unknown sources, but was patched into various
+      forks of the Seeed version on GitHub.
+        -- Aaron S. Crandall <crandall@gonzaga.edu>
+  */
     /**
    * Setting normal mode or gaming mode at BANK1 register 0x65/0x66 R_IDLE_TIME[15:0]
    * T = 256/System CLK = 32us, 

@@ -1,38 +1,41 @@
 /*
-   Copyright (c) 2015 seeed technology inc.
-   Website    : www.seeed.cc
-   Author     : Wuruibin & Xiangnan
-   Modified Time: June 2015
+  RevEng_PAJ7620.h
 
-   2017 - Modified by MarcFinns to encapsulate in class without global variables
-   2020 - PROGMEM code adapted from Jaycar-Electronics' work
-   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
-   
+  Copyright (c) 2015 seeed technology inc.
+  Website    : www.seeed.cc
+  Author     : Wuruibin & Xiangnan
+  Modified Time: June 2015
 
-   Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-          move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+  2017 - Modified by MarcFinns to encapsulate in class without global variables
+  2020 - PROGMEM code adapted from Jaycar-Electronics' work
+  2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
-   Version: 1.2.0
+  Version: 1.2.0
 
-   The MIT License (MIT)
+  Description: This demo can recognize 9 gestures and output the result,
+        including move up, move down, move left, move right,
+        move forward, move backward, circle-clockwise,
+        circle-anti (counter) clockwise, and wave.
 
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
+  License: The MIT License (MIT)
 
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
 /*
@@ -43,6 +46,7 @@
 #ifndef __PAJ7620_H__
 #define __PAJ7620_H__
 
+#include "Arduino.h"
 #include <Wire.h>
 
 #if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
@@ -382,7 +386,7 @@ const unsigned short initRegisterArray[] = {
 
 
 /*
-  PAJ7620U Device API class - As developed by RevEng Devs
+  PAJ7620 Device API class - As developed by RevEng Devs
  */
 class RevEng_PAJ7620
 {

@@ -389,6 +389,7 @@ class RevEng_PAJ7620
 {
   public:
     uint8_t begin();
+    uint8_t begin(TwoWire * chosenWireHandle);    // Ex: begin(&Wire1)
 
     Gesture readGesture();
     void clearGesture();
@@ -399,12 +400,14 @@ class RevEng_PAJ7620
 
     int getWaveCount();
 
-    void disable();
-    void enable();
+    void disable();                 // Suspend interrupts (both pin and registers)
+    void enable();                  // Resume interrupts (both pin and registers)
 
   private:
-    unsigned long gestureEntryTime;
-    unsigned long gestureExitTime;
+    unsigned long gestureEntryTime; // User set gesture entry delay in ms (default: 0)
+    unsigned long gestureExitTime;  // User set gesture exit delay in ms (default 200)
+
+    TwoWire *wireHandle;            // User selected Wire bus (default: Wire)
 
     uint8_t writeRegister(uint8_t addr, uint8_t cmd);
     uint8_t readRegister(uint8_t addr, uint8_t qty, uint8_t data[]);

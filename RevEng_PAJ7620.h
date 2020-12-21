@@ -55,8 +55,8 @@
 #endif
 
 /* 
-  Direction definitions 
-  - Used as return value from gesture read method
+  Gesture result definitions 
+  - Used as return value from readGesture call
  */
 enum Gesture {
   GES_NONE = 0,
@@ -72,7 +72,7 @@ enum Gesture {
 };
 
 /*
-  bank_e used to for selecting PAJ7620 memory bank to read/write from
+  Bank_e used for selecting PAJ7620 memory bank to read/write from
  */
 typedef enum {
   BANK0 = 0,
@@ -81,14 +81,11 @@ typedef enum {
 
 
 // DEVICE'S I2C ID - defined by manufacturer
-#define PAJ7620_I2C_BUS_ADDR    0x73
+#define PAJ7620_I2C_BUS_ADDR              0x73
 
 // Device's hard coded ID values
-#define PAJ7620_PART_ID_LSB     0x20
-#define PAJ7620_PART_ID_MSB     0x76
-
-// REGISTER DESCRIPTION
-#define PAJ7620_VAL(val, maskbit)    ( val << maskbit )
+#define PAJ7620_PART_ID_LSB               0x20
+#define PAJ7620_PART_ID_MSB               0x76
 
 // Base address for accessing registers
 #define PAJ7620_ADDR_BASE                 0x00
@@ -126,16 +123,16 @@ typedef enum {
 #define PAJ7620_ADDR_OPERATION_ENABLE     (PAJ7620_ADDR_BASE + 0x72)  // RW
 
 // PAJ7620_REGISTER_BANK_SEL
-#define PAJ7620_BANK0                     0x00      //PAJ7620_VAL(0,0)
-#define PAJ7620_BANK1                     0x01      //PAJ7620_VAL(1,0)
+#define PAJ7620_BANK0                     0x00
+#define PAJ7620_BANK1                     0x01
 
 // PAJ7620_ADDR_SUSPEND_CMD
-#define PAJ7620_I2C_WAKEUP                0x01      //PAJ7620_VAL(1,0)
-#define PAJ7620_I2C_SUSPEND               0x00      //PAJ7620_VAL(0,0)
+#define PAJ7620_I2C_WAKEUP                0x01
+#define PAJ7620_I2C_SUSPEND               0x00
 
 // PAJ7620_ADDR_OPERATION_ENABLE
-#define PAJ7620_ENABLE                    0x01      //PAJ7620_VAL(1,0)
-#define PAJ7620_DISABLE                   0x00      //PAJ7620_VAL(0,0)
+#define PAJ7620_ENABLE                    0x01
+#define PAJ7620_DISABLE                   0x00
 
 // Return values from gesture I2C memory reads in Bank 0 - 0x43 & 0x44
 #define GES_UP_FLAG                       0x01
@@ -392,15 +389,18 @@ class RevEng_PAJ7620
 {
   public:
     uint8_t begin();
+
     Gesture readGesture();
     void clearGesture();
-    int getWaveCount();
+
     void setGestureEntryTime(unsigned long newGestureEntryTime);
     void setGestureExitTime(unsigned long newGestureExitTime);
     // void setGameMode(); // No documentation for this mode is available (yet)
 
-	void disable();
-	void enable();
+    int getWaveCount();
+
+    void disable();
+    void enable();
 
   private:
     unsigned long gestureEntryTime;

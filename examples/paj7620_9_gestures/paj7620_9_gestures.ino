@@ -1,121 +1,118 @@
 /*
-   Author     : MarcFinns
-   Modified Time: March 2017
+  Example Script: paj7620_9_gestures.ino
+  Package: RevEng_PAJ7620
 
-   Author     : Aaron S. Crandall <crandall@gonzaga.edu>
-   Modified Time: December 2020
+  Copyright (c) 2020 Aaron S. Crandall
+  Author        : Aaron S. Crandall <crandall@gonzaga.edu>
+  Modified Time : December 2020
 
-   Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-   move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+  Description: This demo can recognize 9 gestures and output the result,
+    including move up, move down, move left, move right, move forward,
+    move backward, circle-clockwise, circle-counter clockwise, and wave.
+
+  License: Same as package under MIT License (MIT)
 */
-
-#include <Wire.h>
 
 // Includes enum definition of GES_* return values from readGesture()
 #include "RevEng_PAJ7620.h"
 
 // Create gesture sensor driver object
-RevEng_PAJ7620U sensor = RevEng_PAJ7620U();
+RevEng_PAJ7620 sensor = RevEng_PAJ7620();
 
 
 // *********************************************************************
 void setup()
 {
-  int error_code = 0;
-
   Serial.begin(115200);
-  Serial.println("\nPAJ7620U2 sensor demo: Recognizing 9 gestures.");
 
-  error_code = sensor.begin();			// Initialize PAJ7620 registers
-                                    // return value of 0 == success
-  if (error_code)
+  Serial.println("PAJ7620 sensor demo: Recognizing all 9 gestures.");
+
+  if( !sensor.begin() )           // return value of 0 == success
   {
-    Serial.print("PAJ7620U2 init error code: ");
-    Serial.println(error_code);
+    Serial.print("PAJ7620 I2C error - halting");
+    while(true) { }
   }
   else
   {
-    Serial.println("PAJ7620U2 init: OK");
+    Serial.println("PAJ7620 init: OK");
   }
 
-  sensor.setGestureExitTime(0);
-  sensor.setGestureEntryTime(0);
-
-  Serial.println("Please input your gestures:\n");
+  Serial.println("Please input your gestures:");
 }
 
 
 // *********************************************************************
 void loop()
 {
-  int gesture;
-  gesture = sensor.readGesture();
+  Gesture gesture;                  // Gesture is an enum type from RevEng_PAJ7620.h
+  gesture = sensor.readGesture();   // Read back current gesture (if any) of type Gesture
 
-  switch (gesture) 									// When different gestures be detected, the variable 'data' will be set to different values by paj7620ReadReg(0x43, 1, &data).
+  switch (gesture)
   {
     case GES_FORWARD:
       {
-        Serial.print(" GES_FORWARD");
+        Serial.print("GES_FORWARD");
         break;
       }
 
     case GES_BACKWARD:
       {
-        Serial.print(" GES_BACKWARD");
+        Serial.print("GES_BACKWARD");
         break;
       }
 
     case GES_LEFT:
       {
-        Serial.print(" GES_LEFT");
+        Serial.print("GES_LEFT");
         break;
       }
 
     case GES_RIGHT:
       {
-        Serial.print(" GES_RIGHT");
+        Serial.print("GES_RIGHT");
         break;
       }
 
     case GES_UP:
       {
-        Serial.print(" GES_UP");
+        Serial.print("GES_UP");
         break;
       }
 
     case GES_DOWN:
       {
-        Serial.print(" GES_DOWN");
+        Serial.print("GES_DOWN");
         break;
       }
 
     case GES_CLOCKWISE:
       {
-        Serial.print(" GES_CLOCKWISE");
+        Serial.print("GES_CLOCKWISE");
         break;
       }
 
     case GES_ANTICLOCKWISE:
       {
-        Serial.print(" GES_ANTICLOCKWISE");
+        Serial.print("GES_ANTICLOCKWISE");
         break;
       }
 
     case GES_WAVE:
       {
-        Serial.print(" GES_WAVE");
+        Serial.print("GES_WAVE");
         break;
       }
+
     case GES_NONE:
       {
-        // Serial.print(" GES_NONE");
         break;
       }
   }
 
   if( gesture != GES_NONE )
   {
-    Serial.println(", Code: " + String(gesture));
+    Serial.print(", Code: ");
+    Serial.println(gesture);
   }
 
   delay(100);

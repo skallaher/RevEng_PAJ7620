@@ -34,22 +34,23 @@ There's a great tutorial on Arduino library installation at: http://learn.adafru
 
 **Library History**
 
-#### Version 1.2 ####
+#### Version 1.2.0 ####
 - Work done by [Aaron S. Crandall](https://github.com/acrandal) \<crandall@gonzaga.edu>.  
 - Library is able to return a current count of waves by the user.  
 - Library now provides several extra example Arduino programs to showcase using the wave feature and more of the API.  
 - Incorporated PROGMEM based approach to storing the extensive initialization configuration adapted from the [Jaycar Electronics](https://www.jaycar.com.au/) fork, saving 21% of SRAM memory on an Arduino Uno (ATMega328P) board.  
-- Lots of object refactoring and method layout to make it easier to read and test.  
+- Lots of object refactoring and method layout to make it easier to read and test.
 - Plenty of small formatting, commenting updates, and other details.  
+- Bugfix: Brought interrupt bits into alignment with official documentation for gesture directions (see v0.8 of documentation).
 
-#### Version 1.1 ####
+#### Version 1.1.0 ####
 - Work done by [Marc Finns](https://github.com/MarcFinns).  
 - Based on the original SEEED library but with higher level API and fully encapsulated in a C++ object (no global variables).   
 - No need for registry manipulation in user code anymore.  
 - A gesture event is returned with an API call.  
 - Library provides an interrupt based example using the PAJ7620 object.  
 
-#### Version 1.0 ####
+#### Version 1.0.0 ####
 - [SEEED](https://www.seeedstudio.com/) released [library](https://github.com/Seeed-Studio/Gesture_PAJ7620) is able to identify and return all 9 gestures and up to 15 calculated gestures in example Arduino code.
 
 
@@ -63,4 +64,4 @@ There's a great tutorial on Arduino library installation at: http://learn.adafru
 MIT - see LICENSE file
 
 **Version**  
-1.2
+1.2.0

@@ -8,10 +8,11 @@
    2020 - PROGMEM code adapted from Jaycar Electronics' work
    2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
-   Version 1.2
+   Version 1.2.0
    
-   Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-          move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+   Description: This demo can recognize 9 gestures and output the result, including
+          move up, move down, move left, move right, move forward, move backward,
+          circle-clockwise, circle-counter clockwise, and wave.
 
    The MIT License (MIT)
 
@@ -42,9 +43,9 @@
    Function Name: begin
    Description:  PAJ7620 device I2C connect and initialize
    Parameters: none
-   Return: error code; success: return 0
+   Return: error code: 0; success: return 1
 ****************************************************************/
-uint8_t RevEng_PAJ7620U::begin()
+uint8_t RevEng_PAJ7620::begin()
 {
   // Reasonable timing delay values to make algorithm insensitive to
   //  hand entry and exit moves before and after detecting a gesture
@@ -56,16 +57,16 @@ uint8_t RevEng_PAJ7620U::begin()
   selectRegisterBank(BANK0);          // Default operations on BANK0
 
   if( !isPAJ7620UDevice() ) {
-    return 0xFF;                      // Return error code - wrong device found
+    return 0;                         // Return false - wrong device found
   }
 
-  initializeDeviceSettings();         // Set all config registers
+  initializeDeviceSettings();         // Set registers for gesture mode
 
   // WARNING: Failing to select BANK0 here will make the device not work
   //  No, I don't know why - Crandall
   selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
 
-  return 0;
+  return 1;
 }
 
 
@@ -75,7 +76,7 @@ uint8_t RevEng_PAJ7620U::begin()
    Parameters: addr:reg address; cmd:data (byte) to write
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t RevEng_PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
+uint8_t RevEng_PAJ7620::writeRegister(uint8_t addr, uint8_t cmd)
 {
   uint8_t result_code = 0;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
@@ -94,7 +95,7 @@ uint8_t RevEng_PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
            data[]:storage memory start address
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t RevEng_PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
+uint8_t RevEng_PAJ7620::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
   uint8_t result_code;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
@@ -122,7 +123,7 @@ uint8_t RevEng_PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t RevEng_PAJ7620U::getGesturesReg0(uint8_t data[])
+uint8_t RevEng_PAJ7620::getGesturesReg0(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
 
 
@@ -132,17 +133,17 @@ uint8_t RevEng_PAJ7620U::getGesturesReg0(uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t RevEng_PAJ7620U::getGesturesReg1(uint8_t data[])
+uint8_t RevEng_PAJ7620::getGesturesReg1(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, data); }
 
 
 /****************************************************************
    Function Name: selectRegisterBank
    Description:  PAJ7620 select register bank
-   Parameters: BANK0, BANK1 - see bank_e enum
+   Parameters: BANK0, BANK1 - see Bank_e enum
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::selectRegisterBank(bank_e bank)
+void RevEng_PAJ7620::selectRegisterBank(Bank_e bank)
 {
   if( bank == BANK0 )
     { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0); }
@@ -157,7 +158,7 @@ void RevEng_PAJ7620U::selectRegisterBank(bank_e bank)
    Parameters: none
    Return: true/false
 ****************************************************************/
-bool RevEng_PAJ7620U::isPAJ7620UDevice()
+bool RevEng_PAJ7620::isPAJ7620UDevice()
 {
   uint8_t data0 = 0, data1 = 0;
 
@@ -185,7 +186,7 @@ bool RevEng_PAJ7620U::isPAJ7620UDevice()
    Parameters: none
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::initializeDeviceSettings()
+void RevEng_PAJ7620::initializeDeviceSettings()
 {
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
@@ -205,22 +206,32 @@ void RevEng_PAJ7620U::initializeDeviceSettings()
 }
 
 
-void RevEng_PAJ7620U::Disable()
+/****************************************************************
+   Function Name: disable
+   Description: Disables sensor for reading & interrupts
+   Parameters: none
+   Return: none
+****************************************************************/
+void RevEng_PAJ7620::disable()
 {
   selectRegisterBank(BANK1);
-  Serial.println("Supposedly disable operation");
   writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_DISABLE);
   selectRegisterBank(BANK0);
 }
 
-void RevEng_PAJ7620U::Enable()
+
+/****************************************************************
+   Function Name: enable
+   Description: Enables sensor for reading & interrupts
+   Parameters: none
+   Return: none
+****************************************************************/
+void RevEng_PAJ7620::enable()
 {
   selectRegisterBank(BANK1);
-  Serial.println("Supposedly disable enable");
   writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_ENABLE);
   selectRegisterBank(BANK0);
 }
-
 
 
 /****************************************************************
@@ -230,7 +241,7 @@ void RevEng_PAJ7620U::Enable()
    Parameters: unsigned long newGestureEntryTime
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
+void RevEng_PAJ7620::setGestureEntryTime(unsigned long newGestureEntryTime)
 {
   gestureEntryTime = newGestureEntryTime;
 }
@@ -244,7 +255,7 @@ void RevEng_PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
    Parameters: unsigned long newGestureExitTime
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
+void RevEng_PAJ7620::setGestureExitTime(unsigned long newGestureExitTime)
 {
   gestureExitTime = newGestureExitTime;
 }
@@ -256,8 +267,8 @@ void RevEng_PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
    Parameters: none
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::setGameMode()
-{
+// void RevEng_PAJ7620::setGameMode()
+// {
     /**
    * Setting normal mode or gaming mode at BANK1 register 0x65/0x66 R_IDLE_TIME[15:0]
    * T = 256/System CLK = 32us, 
@@ -284,16 +295,17 @@ void RevEng_PAJ7620U::setGameMode()
   //paj7620WriteReg(0x65, 0x12);  // near mode 240 fps
 
   // paj7620SelectBank(BANK0);  //gesture flage reg in Bank0
-}
+// }
 
 
 /****************************************************************
-   Function Name: cancelGesture
+   Function Name: clearGesture
    Description: API call to clear current gesture interrupt vectors
+     NOTE: These vectors are set to zero in hardware after any reads
    Parameters: none
    Return: none
 ****************************************************************/
-void RevEng_PAJ7620U::cancelGesture()
+void RevEng_PAJ7620::clearGesture()
 {
     uint8_t data = 0, data1 = 0;
     getGesturesReg0(&data);
@@ -307,7 +319,7 @@ void RevEng_PAJ7620U::cancelGesture()
    Parameters: none
    Return: int quantity of waves (passes) over the sensor
 ****************************************************************/
-int RevEng_PAJ7620U::getWaveCount()
+int RevEng_PAJ7620::getWaveCount()
 {
   uint8_t waveCount = 0;
   readRegister(PAJ7620_ADDR_WAVE_COUNT, 1, &waveCount);
@@ -323,7 +335,7 @@ int RevEng_PAJ7620U::getWaveCount()
    Parameters: Gesture initialGesture
    Return: Gesture - the double checked gesture
 ****************************************************************/
-Gesture RevEng_PAJ7620U::forwardBackwardGestureCheck(Gesture initialGesture)
+Gesture RevEng_PAJ7620::forwardBackwardGestureCheck(Gesture initialGesture)
 {
   uint8_t data1 = 0;
   Gesture result = initialGesture;
@@ -351,7 +363,7 @@ Gesture RevEng_PAJ7620U::forwardBackwardGestureCheck(Gesture initialGesture)
    Parameters: none
    Return: int (Gesture enum) - gesture found or no gesture found (0)
 ****************************************************************/
-int RevEng_PAJ7620U::readGesture()
+Gesture RevEng_PAJ7620::readGesture()
 {
   uint8_t data = 0, data1 = 0, readCode = 0;
   Gesture result = GES_NONE;
@@ -406,5 +418,5 @@ int RevEng_PAJ7620U::readGesture()
         break;
     }
   }
-  return (int)result;
+  return result;
 }

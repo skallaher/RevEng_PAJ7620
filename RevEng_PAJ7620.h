@@ -12,7 +12,7 @@
    Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
           move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
 
-   Version: 1.2
+   Version: 1.2.0
 
    The MIT License (MIT)
 
@@ -55,11 +55,11 @@
   - Used as return value from gesture read method
  */
 enum Gesture {
-  GES_NONE,
-  GES_LEFT,
-  GES_RIGHT,
+  GES_NONE = 0,
   GES_UP,
   GES_DOWN,
+  GES_LEFT,
+  GES_RIGHT,
   GES_FORWARD,
   GES_BACKWARD,
   GES_CLOCKWISE,
@@ -73,7 +73,7 @@ enum Gesture {
 typedef enum {
   BANK0 = 0,
   BANK1,
-} bank_e;
+} Bank_e;
 
 
 // DEVICE'S I2C ID - defined by manufacturer
@@ -122,27 +122,27 @@ typedef enum {
 #define PAJ7620_ADDR_OPERATION_ENABLE     (PAJ7620_ADDR_BASE + 0x72)  // RW
 
 // PAJ7620_REGISTER_BANK_SEL
-#define PAJ7620_BANK0   PAJ7620_VAL(0,0)
-#define PAJ7620_BANK1   PAJ7620_VAL(1,0)
+#define PAJ7620_BANK0                     0x00      //PAJ7620_VAL(0,0)
+#define PAJ7620_BANK1                     0x01      //PAJ7620_VAL(1,0)
 
 // PAJ7620_ADDR_SUSPEND_CMD
-#define PAJ7620_I2C_WAKEUP  PAJ7620_VAL(1,0)
-#define PAJ7620_I2C_SUSPEND PAJ7620_VAL(0,0)
+#define PAJ7620_I2C_WAKEUP                0x01      //PAJ7620_VAL(1,0)
+#define PAJ7620_I2C_SUSPEND               0x00      //PAJ7620_VAL(0,0)
 
 // PAJ7620_ADDR_OPERATION_ENABLE
-#define PAJ7620_ENABLE    PAJ7620_VAL(1,0)
-#define PAJ7620_DISABLE   PAJ7620_VAL(0,0)
+#define PAJ7620_ENABLE                    0x01      //PAJ7620_VAL(1,0)
+#define PAJ7620_DISABLE                   0x00      //PAJ7620_VAL(0,0)
 
-// Return values from gesture I2C memory reads
-#define GES_RIGHT_FLAG            PAJ7620_VAL(1,0)
-#define GES_LEFT_FLAG             PAJ7620_VAL(1,1)
-#define GES_UP_FLAG               PAJ7620_VAL(1,2)
-#define GES_DOWN_FLAG             PAJ7620_VAL(1,3)
-#define GES_FORWARD_FLAG          PAJ7620_VAL(1,4)
-#define GES_BACKWARD_FLAG         PAJ7620_VAL(1,5)
-#define GES_CLOCKWISE_FLAG        PAJ7620_VAL(1,6)
-#define GES_ANTI_CLOCKWISE_FLAG   PAJ7620_VAL(1,7)
-#define GES_WAVE_FLAG             PAJ7620_VAL(1,0)  // Read from 0x44
+// Return values from gesture I2C memory reads in Bank 0 - 0x43 & 0x44
+#define GES_UP_FLAG                       0x01
+#define GES_DOWN_FLAG                     0x02
+#define GES_LEFT_FLAG                     0x04
+#define GES_RIGHT_FLAG                    0x08
+#define GES_FORWARD_FLAG                  0x10
+#define GES_BACKWARD_FLAG                 0x20
+#define GES_CLOCKWISE_FLAG                0x40
+#define GES_ANTI_CLOCKWISE_FLAG           0x80
+#define GES_WAVE_FLAG                     0x01      // Read from Bank0 - 0x44
 
 
 #define INIT_REG_ARRAY_SIZE (sizeof(initRegisterArray)/sizeof(initRegisterArray[0]))
@@ -153,6 +153,7 @@ typedef enum {
   Changed to JayCar-Electronics PROGMEM approach from their fork
     https://github.com/Jaycar-Electronics
     Saves about 21% of SRAM on an Arduino Uno - Around 440 bytes
+  Values taken from PixArt reference documentation v0.8
 */
 #ifdef PROGMEM_COMPATIBLE
 const unsigned short initRegisterArray[] PROGMEM = {
@@ -383,19 +384,19 @@ const unsigned short initRegisterArray[] = {
 /*
   PAJ7620U Device API class - As developed by RevEng Devs
  */
-class RevEng_PAJ7620U
+class RevEng_PAJ7620
 {
   public:
     uint8_t begin();
-    int readGesture();
-    void cancelGesture();
+    Gesture readGesture();
+    void clearGesture();
     int getWaveCount();
     void setGestureEntryTime(unsigned long newGestureEntryTime);
     void setGestureExitTime(unsigned long newGestureExitTime);
-    void setGameMode();
+    // void setGameMode(); // No documentation for this mode is available (yet)
 
-	void Disable();
-	void Enable();
+	void disable();
+	void enable();
 
   private:
     unsigned long gestureEntryTime;
@@ -403,7 +404,9 @@ class RevEng_PAJ7620U
 
     uint8_t writeRegister(uint8_t addr, uint8_t cmd);
     uint8_t readRegister(uint8_t addr, uint8_t qty, uint8_t data[]);
-    void selectRegisterBank(bank_e bank);
+
+    void selectRegisterBank(Bank_e bank);
+
     uint8_t getGesturesReg0(uint8_t data[]);
     uint8_t getGesturesReg1(uint8_t data[]);
 

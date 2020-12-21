@@ -32,11 +32,8 @@ void setup()
     Serial.print("PAJ7620 init error -- device not found -- halting");
     while(true) {}
   }
-  else
-  {
-    Serial.println("PAJ7620U2 init: OK.");
-  }
 
+  Serial.println("PAJ7620U2 init: OK.");
   Serial.println("Wave your hand up to turn on light, and down to turn it off.");
 }
 

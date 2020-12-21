@@ -44,14 +44,11 @@ void setup()
     Serial.print("PAJ7620 I2C error - halting");
     while(true) {}
   }
-  else
-  {
-    Serial.println("PAJ7620 Init OK.");
-  }
+
+  Serial.println("PAJ7620 Init OK.");
+  Serial.println("Please input your gestures:");
 
   attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), interruptRoutine, FALLING);
-
-  Serial.println("Please input your gestures:");
 }
 
 

@@ -78,8 +78,8 @@ GES_NONE, GES_UP, GES_DOWN, GES_LEFT, GES_RIGHT, GES_FORWARD, GES_BACKWARD, GES_
 Reading a gesture has timing issues, notably the time it takes for the person to position their hand before starting a gesture and the time to remove their hand after finishing the gesture.
 These values are most important for the forward and backward gestures.
 To provide the ability to tune these timing values, two interfaces are provided to set their values in milliseconds:
-- void setGestureEntryTime(unsigned long newGestureEntryTime);
-- void setGestureExitTime(unsigned long newGestureExitTime);
+> void setGestureEntryTime(unsigned long newGestureEntryTime);  
+> void setGestureExitTime(unsigned long newGestureExitTime);
 
 These values are defaulted to Entry Time: 0ms and Exit Time: 200ms.
 You might need to play with these values for your given application and expected use behaviors.
@@ -102,9 +102,29 @@ This library provides an interface to disable the devices and enable it as neede
 When disabled, the sensor will not raise any interrupts, either on the interrupt pin or when calling readGesture();  
 NOTE: There is a more complete disabling that turns of all I2C messages, but that is not implemented fully here.
 
+### Multiple or Non-default Wire bus use ###
+
+To use other I2C busses than the default Wire, use the begin() initializer by passing a pointer to the bus you want.
+The library will store the bus of choice and use it from there on out.
+For example:
+> sensor.begin(&Wire1);
+
+You can use multiple PAJ7620 devices on an Arduino, with one per I2C bus if your device has multiple busses available.
+This would look like:
+
+> RevEng_PAJ7620 sensor = RevEng_PAJ7620();  
+> sensor.begin(&Wire);  
+> RevEng_PAJ7620 sensor2 = RevEng_PAJ7620();  
+> sensor2.begin(&Wire1);  
+
 ---
 
 ## Library History ##
+
+#### Version 1.3.0 ####
+- Work done by [Aaron S. Crandall](https://github.com/acrandal) \<crandall@gonzaga.edu>.
+- Library now has a begin(TwoWire *bus) interface to allow user to pass a chosen TwoWire bus object for handling situations where they're using a second (or third) I2C bus on their device. For example: sensor.begin(&Wire1).
+
 
 #### Version 1.2.0 ####
 - Work done by [Aaron S. Crandall](https://github.com/acrandal) \<crandall@gonzaga.edu>.  

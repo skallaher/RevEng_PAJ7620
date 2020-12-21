@@ -43,19 +43,35 @@
 
 /****************************************************************
    Function Name: begin
-   Description:  PAJ7620 device I2C connect and initialize
+   Description: PAJ7620 device I2C connect and initialize on default Wire bus
    Parameters: none
    Return: error code: 0 (false); success: return 1 (true)
 ****************************************************************/
 uint8_t RevEng_PAJ7620::begin()
+{
+  return begin(&Wire);
+}
+
+/****************************************************************
+   Function Name: begin(TwoWire *)
+   Description:  PAJ7620 device I2C connect and initialize
+     Override version: Takes a TwoWire pointer allowing the user to pass
+      in a specified I2C bus for devices using alternatives to bus 0 such
+      as: begin(&Wire1) or begin(&Wire2)
+   Parameters: none
+   Return: error code: 0 (false); success: return 1 (true)
+****************************************************************/
+uint8_t RevEng_PAJ7620::begin(TwoWire *chosenWireHandle)
 {
   // Reasonable timing delay values to make algorithm insensitive to
   //  hand entry and exit moves before and after detecting a gesture
   gestureEntryTime = 0;
   gestureExitTime = 200;
 
+  wireHandle = chosenWireHandle;      // Save selected I2C bus for our use
+
   delayMicroseconds(700);	            // Wait 700us for PAJ7620U2 to stabilize
-  Wire.begin();                       // Initialize I2C bus
+  wireHandle->begin();
   selectRegisterBank(BANK0);          // Default operations on BANK0
 
   if( !isPAJ7620UDevice() ) {
@@ -81,10 +97,10 @@ uint8_t RevEng_PAJ7620::begin()
 uint8_t RevEng_PAJ7620::writeRegister(uint8_t addr, uint8_t cmd)
 {
   uint8_t result_code = 0;
-  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
-  Wire.write(addr);                               // send register address
-  Wire.write(cmd);                                // send value to write
-  result_code = Wire.endTransmission();           // end transmission
+  wireHandle->beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
+  wireHandle->write(addr);                               // send register address
+  wireHandle->write(cmd);                                // send value to write
+  result_code = wireHandle->endTransmission();           // end transmission
   return result_code;
 }
 
@@ -100,18 +116,18 @@ uint8_t RevEng_PAJ7620::writeRegister(uint8_t addr, uint8_t cmd)
 uint8_t RevEng_PAJ7620::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
   uint8_t result_code;
-  Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
-  Wire.write(addr);
-  result_code = Wire.endTransmission();
+  wireHandle->beginTransmission(PAJ7620_I2C_BUS_ADDR);
+  wireHandle->write(addr);
+  result_code = wireHandle->endTransmission();
 
   if (result_code)            //return error code - if not zero
     { return result_code; }
 
-  Wire.requestFrom((int)PAJ7620_I2C_BUS_ADDR, (int)qty);
+  wireHandle->requestFrom((int)PAJ7620_I2C_BUS_ADDR, (int)qty);
 
-  while (Wire.available())
+  while (wireHandle->available())
   {
-    *data = Wire.read();
+    *data = wireHandle->read();
     data++;
   }
 

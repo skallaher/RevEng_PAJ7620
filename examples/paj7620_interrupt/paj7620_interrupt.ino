@@ -1,44 +1,54 @@
 /*
+  Example Script: paj7620_interrupt.ino
+  Package: RevEng_PAJ7620
 
-   Author     : MarcFinns
-   Modified Time: March 2017
-   Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-   move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+  Copyright (c) 2017 Marc Finns
+  Author       : MarcFinns
+  Modified Time: March 2017
+  
+  Modified:
+  2020 - Aaron S. Crandall <crandall@gonzaga.edu>
 
+  Description: This demo can recognize 9 gestures and output the result,
+    including move up, move down, move left, move right, move forward,
+    move backward, circle-clockwise, circle-counter clockwise, and wave.
+    This example uses an interrupt handler to detect when a gesture has
+    occurred instead of polling for it.
+
+  Special wiring: sensor INT pin to microcontroller (Arduino) pin 2
+
+  License: Same as package under MIT License (MIT)
 */
 
-#include <Wire.h>
-#include "libpaj7620.h"
+// Includes enum definition of GES_* return values from readGesture()
+#include "RevEng_PAJ7620.h"
 
-#define INTERRUPT_PIN 10
+#define INTERRUPT_PIN 2                     // Interrupt capable Arduino pin 
 
-bool isr = false;
-PAJ7620U sensor = PAJ7620U();
+// Note: When using interrupts, any variables used both in and out of the
+//  interrupt routine should be declared volatile.
+volatile bool isr = false;                  // isr == Interrupt Service Routine
+
+RevEng_PAJ7620 sensor = RevEng_PAJ7620();   // Create gesture sensor API/Object
 
 // ***************************************************************************
 void setup()
 {
-  uint8_t error = 0;
-
-  // Set interrupt pin as input
   pinMode(INTERRUPT_PIN, INPUT);
 
   Serial.begin(115200);
-  Serial.println("\nPAJ7620U2 TEST DEMO: Recognize 9 gestures.");
+  Serial.println("PAJ7620 Test Demo: Recognize 9 gestures using interrupt callback.");
 
-  error = sensor.begin();			// initialize Paj7620 registers
-  if (error)
+  if( !sensor.begin() )                     // Returns 0 if sensor connect fail
   {
-    Serial.print("INIT ERROR, CODE: ");
-    Serial.println(error);
+    Serial.print("PAJ7620 I2C error - halting");
+    while(true) {}
   }
-  else
-  {
-    Serial.println("INIT OK");
-  }
-  Serial.println("Please input your gestures:\n");
 
-  attachInterrupt(INTERRUPT_PIN, interruptRoutine, FALLING);
+  Serial.println("PAJ7620 Init OK.");
+  Serial.println("Please input your gestures:");
+
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), interruptRoutine, FALLING);
 }
 
 
@@ -46,14 +56,13 @@ void setup()
 void loop()
 {
 
-  int gesture;
-  if (isr == true)
+  Gesture gesture;                  // Gesture is an enum type from RevEng_PAJ7620.h
+  if (isr == true)                  // See interruptRoutine for where this is set to true
   {
-    long stamp = millis();
-    isr = false;
-    gesture = sensor.readGesture();
+    isr = false;                    // Reset ISR flag for next interrupt
+    gesture = sensor.readGesture(); // Read back current gesture (if any) of type Gesture
 
-    switch (gesture) 									// When different gestures be detected, the variable 'data' will be set to different values by paj7620ReadReg(0x43, 1, &data).
+    switch (gesture)
     {
       case GES_FORWARD:
         {
@@ -97,9 +106,9 @@ void loop()
           break;
         }
 
-      case GES_CNTRCLOCKWISE:
+      case GES_ANTICLOCKWISE:
         {
-          Serial.print(" GES_CNTRCLOCKWISE");
+          Serial.print(" GES_ANTICLOCKWISE");
           break;
         }
 
@@ -108,13 +117,19 @@ void loop()
           Serial.print(" GES_WAVE");
           break;
         }
+
       case GES_NONE:
         {
           Serial.print(" GES_NONE");
           break;
         }
     }
-    Serial.println(", Code: " + String(gesture) + " - Gesture handled in " + String (millis() - stamp) + " ms");
+
+    Serial.print(", Gesture Code: ");
+    Serial.println(gesture);
+
+    // If a second gesture happens while the first is being handled,
+    // isr might be set true again already, to be handled on the next loop()
     if (isr == true)
     {
       Serial.println(" --> Interrupt during event processing");
@@ -122,10 +137,11 @@ void loop()
   }
 }
 
+// Called then interrupt pin is set high
 void interruptRoutine()
 {
   isr = true;
-  Serial.print("Interrupt!");
+  Serial.print("Interrupt! -- ");
 }
 
 

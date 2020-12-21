@@ -1,70 +1,74 @@
 /*
-   Copyright (c) 2015 seeed technology inc.
-   Website    : www.seeed.cc
-   Author     : Wuruibin & Xiangnan
-   Modified Time: June 2015
+  RevEng_PAJ7620.cpp
+
+  Copyright (c) 2015 seeed technology inc.
+  Website    : www.seeed.cc
+  Author     : Wuruibin & Xiangnan
+  Modified Time: June 2015
    
-   2017 - Modified by MarcFinns to encapsulate in class without global variables
-   2020 - PROGMEM code adapted from Jaycar Electronics' work
-   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
+  2017 - Modified by MarcFinns to encapsulate in class without global variables
+  2020 - PROGMEM code adapted from Jaycar Electronics' work
+  2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
-   Version 1.2
-   
-   Description: This demo can recognize 9 gestures and output the result, including move up, move down, move left, move right,
-  				move forward, move backward, circle-clockwise, circle-counter clockwise, and wave.
+  Version: 1.2.0
 
-   The MIT License (MIT)
+  Description: This demo can recognize 9 gestures and output the result,
+        including move up, move down, move left, move right,
+        move forward, move backward, circle-clockwise,
+        circle-anti (counter) clockwise, and wave.
 
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
+  License: The MIT License (MIT)
 
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
-#include "Arduino.h"
-#include "libpaj7620.h"
+#include "RevEng_PAJ7620.h"
 
 
 /****************************************************************
    Function Name: begin
    Description:  PAJ7620 device I2C connect and initialize
    Parameters: none
-   Return: error code; success: return 0
+   Return: error code: 0 (false); success: return 1 (true)
 ****************************************************************/
-uint8_t PAJ7620U::begin()
+uint8_t RevEng_PAJ7620::begin()
 {
   // Reasonable timing delay values to make algorithm insensitive to
   //  hand entry and exit moves before and after detecting a gesture
   gestureEntryTime = 0;
   gestureExitTime = 200;
 
+  delayMicroseconds(700);	            // Wait 700us for PAJ7620U2 to stabilize
   Wire.begin();                       // Initialize I2C bus
   selectRegisterBank(BANK0);          // Default operations on BANK0
 
   if( !isPAJ7620UDevice() ) {
-    return 0xFF;                      // Return error code - wrong device found
+    return 0;                         // Return false - wrong device found
   }
 
-  initializeDeviceSettings();         // Set all config registers
+  initializeDeviceSettings();         // Set registers for gesture mode
 
   // WARNING: Failing to select BANK0 here will make the device not work
   //  No, I don't know why - Crandall
   selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
 
-  return 0;
+  return 1;
 }
 
 
@@ -74,7 +78,7 @@ uint8_t PAJ7620U::begin()
    Parameters: addr:reg address; cmd:data (byte) to write
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
+uint8_t RevEng_PAJ7620::writeRegister(uint8_t addr, uint8_t cmd)
 {
   uint8_t result_code = 0;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);   // start transmission
@@ -93,7 +97,7 @@ uint8_t PAJ7620U::writeRegister(uint8_t addr, uint8_t cmd)
            data[]:storage memory start address
    Return: error code; success: return 0
 ****************************************************************/
-uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
+uint8_t RevEng_PAJ7620::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
 {
   uint8_t result_code;
   Wire.beginTransmission(PAJ7620_I2C_BUS_ADDR);
@@ -121,7 +125,7 @@ uint8_t PAJ7620U::readRegister(uint8_t addr, uint8_t qty, uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
+uint8_t RevEng_PAJ7620::getGesturesReg0(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_0, 1, data); }
 
 
@@ -131,17 +135,17 @@ uint8_t PAJ7620U::getGesturesReg0(uint8_t data[])
    Parameters: &uint8_t for storing value
    Return: error code (0 means no error)
 ****************************************************************/
-uint8_t PAJ7620U::getGesturesReg1(uint8_t data[])
+uint8_t RevEng_PAJ7620::getGesturesReg1(uint8_t data[])
   { return readRegister(PAJ7620_ADDR_GES_RESULT_1, 1, data); }
 
 
 /****************************************************************
    Function Name: selectRegisterBank
    Description:  PAJ7620 select register bank
-   Parameters: BANK0, BANK1 - see bank_e enum
+   Parameters: BANK0, BANK1 - see Bank_e enum
    Return: none
 ****************************************************************/
-void PAJ7620U::selectRegisterBank(bank_e bank)
+void RevEng_PAJ7620::selectRegisterBank(Bank_e bank)
 {
   if( bank == BANK0 )
     { writeRegister(PAJ7620_REGISTER_BANK_SEL, PAJ7620_BANK0); }
@@ -156,7 +160,7 @@ void PAJ7620U::selectRegisterBank(bank_e bank)
    Parameters: none
    Return: true/false
 ****************************************************************/
-bool PAJ7620U::isPAJ7620UDevice()
+bool RevEng_PAJ7620::isPAJ7620UDevice()
 {
   uint8_t data0 = 0, data1 = 0;
 
@@ -184,23 +188,51 @@ bool PAJ7620U::isPAJ7620UDevice()
    Parameters: none
    Return: none
 ****************************************************************/
-void PAJ7620U::initializeDeviceSettings()
+void RevEng_PAJ7620::initializeDeviceSettings()
 {
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
   for (int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
-	{
+  {
     #ifdef PROGMEM_COMPATIBLE
-		  uint16_t word = pgm_read_word(&initRegisterArray[i]);
+      uint16_t word = pgm_read_word(&initRegisterArray[i]);
     #else
       uint16_t word = initRegisterArray[i];
     #endif
 
-		uint8_t address, value;
-		address = (word & 0xFF00) >> 8;
-		value = (word & 0x00FF);
-		writeRegister(address, value);
+    uint8_t address, value;
+    address = (word & 0xFF00) >> 8;
+    value = (word & 0x00FF);
+    writeRegister(address, value);
   }
+}
+
+
+/****************************************************************
+   Function Name: disable
+   Description: Disables sensor for reading & interrupts
+   Parameters: none
+   Return: none
+****************************************************************/
+void RevEng_PAJ7620::disable()
+{
+  selectRegisterBank(BANK1);
+  writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_DISABLE);
+  selectRegisterBank(BANK0);
+}
+
+
+/****************************************************************
+   Function Name: enable
+   Description: Enables sensor for reading & interrupts
+   Parameters: none
+   Return: none
+****************************************************************/
+void RevEng_PAJ7620::enable()
+{
+  selectRegisterBank(BANK1);
+  writeRegister(PAJ7620_ADDR_OPERATION_ENABLE, PAJ7620_ENABLE);
+  selectRegisterBank(BANK0);
 }
 
 
@@ -211,7 +243,7 @@ void PAJ7620U::initializeDeviceSettings()
    Parameters: unsigned long newGestureEntryTime
    Return: none
 ****************************************************************/
-void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
+void RevEng_PAJ7620::setGestureEntryTime(unsigned long newGestureEntryTime)
 {
   gestureEntryTime = newGestureEntryTime;
 }
@@ -225,19 +257,64 @@ void PAJ7620U::setGestureEntryTime(unsigned long newGestureEntryTime)
    Parameters: unsigned long newGestureExitTime
    Return: none
 ****************************************************************/
-void PAJ7620U::setGestureExitTime(unsigned long newGestureExitTime)
+void RevEng_PAJ7620::setGestureExitTime(unsigned long newGestureExitTime)
 {
   gestureExitTime = newGestureExitTime;
 }
 
 
 /****************************************************************
-   Function Name: cancelGesture
-   Description: API call to clear current gesture interrupt vectors
+   Function Name: setGameMode
+   Description: Put sensor into "game mode" - 240fps instead of 120fps
    Parameters: none
    Return: none
 ****************************************************************/
-void PAJ7620U::cancelGesture()
+// void RevEng_PAJ7620::setGameMode()
+// {
+  /*
+    NOTE: No version of the PixArt documentation says how to enable game mode
+      If you know, please let me know so we can get it added here
+      This code below comes from unknown sources, but was patched into various
+      forks of the Seeed version on GitHub.
+        -- Aaron S. Crandall <crandall@gonzaga.edu>
+  */
+    /**
+   * Setting normal mode or gaming mode at BANK1 register 0x65/0x66 R_IDLE_TIME[15:0]
+   * T = 256/System CLK = 32us, 
+   * Ex:
+   * Far Mode: 1 report time = (77+R_IDLE_TIME)T
+   * Report rate 120 fps:
+   * R_IDLE_TIME=1/(120*T)-77=183
+   * 
+   * Report rate 240 fps:
+   * R_IDLE_TIME=1/(240*T)-77=53
+   * 
+   * Near Mode: 1 report time = (112+R_IDLE_TIME)T
+   * 
+   * Report rate 120 fps:
+   * R_IDLE_TIME=1/(120*T)-120=148
+   * 
+   * Report rate 240 fps:
+   * R_IDLE_TIME=1/(240*T)-112=18
+   * 
+   */  
+  // Serial.println("Set up gaming mode.");
+  // paj7620SelectBank(BANK1);  //gesture flage reg in Bank1
+  // paj7620WriteReg(0x65, 0xB7); // far mode 120 fps
+  //paj7620WriteReg(0x65, 0x12);  // near mode 240 fps
+
+  // paj7620SelectBank(BANK0);  //gesture flage reg in Bank0
+// }
+
+
+/****************************************************************
+   Function Name: clearGesture
+   Description: API call to clear current gesture interrupt vectors
+     NOTE: These vectors are set to zero in hardware after any reads
+   Parameters: none
+   Return: none
+****************************************************************/
+void RevEng_PAJ7620::clearGesture()
 {
     uint8_t data = 0, data1 = 0;
     getGesturesReg0(&data);
@@ -251,7 +328,7 @@ void PAJ7620U::cancelGesture()
    Parameters: none
    Return: int quantity of waves (passes) over the sensor
 ****************************************************************/
-int PAJ7620U::getWaveCount()
+int RevEng_PAJ7620::getWaveCount()
 {
   uint8_t waveCount = 0;
   readRegister(PAJ7620_ADDR_WAVE_COUNT, 1, &waveCount);
@@ -264,13 +341,13 @@ int PAJ7620U::getWaveCount()
    Function Name: forwardBackwardGestureCheck
    Description: Used to double check a lateral gesture (up, down, left, right)
      to see if it was actually a vertical gesture (forward, backward)
-   Parameters: gesture initialGesture
-   Return: gesture - the double checked gesture
+   Parameters: Gesture initialGesture
+   Return: Gesture - the double checked gesture
 ****************************************************************/
-gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
+Gesture RevEng_PAJ7620::forwardBackwardGestureCheck(Gesture initialGesture)
 {
   uint8_t data1 = 0;
-  gesture result = initialGesture;
+  Gesture result = initialGesture;
 
   delay(gestureEntryTime);
   getGesturesReg0(&data1);
@@ -293,12 +370,12 @@ gesture PAJ7620U::forwardBackwardGestureCheck(gesture initialGesture)
    Description: Read the latest gesture from the sensor
      -- Clears interrupt vector of gestures upon read
    Parameters: none
-   Return: int (gesture enum) - gesture found or no gesture found (0)
+   Return: int (Gesture enum) - gesture found or no gesture found (0)
 ****************************************************************/
-int PAJ7620U::readGesture()
+Gesture RevEng_PAJ7620::readGesture()
 {
   uint8_t data = 0, data1 = 0, readCode = 0;
-  gesture result = GES_NONE;
+  Gesture result = GES_NONE;
 
   readCode = getGesturesReg0(&data);
   if (readCode)
@@ -350,5 +427,5 @@ int PAJ7620U::readGesture()
         break;
     }
   }
-  return (int)result;
+  return result;
 }

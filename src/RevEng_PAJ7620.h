@@ -51,8 +51,17 @@
 
 #if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #define PROGMEM_COMPATIBLE
-#include <avr/pgmspace.h>
+  #if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266)
+    #include <avr/pgmspace.h>
+  #else
+    #include <pgmspace.h>
+  #endif
 #endif
+
+//#if defined(ARDUINO_ARCH_ESP32)
+//#define PROGMEM_COMPATIBLE
+//#include <pgmspace.h>
+//#endif
 
 /* 
   Gesture result definitions 

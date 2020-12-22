@@ -18,3 +18,5 @@ vendor
 
 *.zip
 *.tar.gz
+
+*.swp

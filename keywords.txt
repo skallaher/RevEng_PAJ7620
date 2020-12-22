@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map for 
+# RevEng PAJ7620U2 Gesture Sensor API
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+Gesture KEYWORD1
+RevEng_PAJ7620 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin   KEYWORD2
+readGesture KEYWORD2
+clearGesture KEYWORD2
+setGestureEntryTime KEYWORD2
+setGestureExitTime KEYWORD2
+getWaveCount KEYWORD2
+disable KEYWORD2
+enable KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

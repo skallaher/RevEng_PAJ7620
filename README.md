@@ -124,7 +124,9 @@ This would look like:
 #### Version 1.3.0 ####
 - Work done by [Aaron S. Crandall](https://github.com/acrandal) \<crandall@gonzaga.edu>.
 - Library now has a begin(TwoWire *bus) interface to allow user to pass a chosen TwoWire bus object for handling situations where they're using a second (or third) I2C bus on their device. For example: sensor.begin(&Wire1).
-
+- Files re-arranged to comport with the [Arduino IDE/CLI library specification](https://arduino.github.io/arduino-cli/latest/library-specification/) for 1.5.0+
+- Updated library.properties for the RevEng arduino library releases.
+- Added keywords.txt for ArduinoIDE syntax highlighting for driver.
 
 #### Version 1.2.0 ####
 - Work done by [Aaron S. Crandall](https://github.com/acrandal) \<crandall@gonzaga.edu>.  

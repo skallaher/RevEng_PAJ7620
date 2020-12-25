@@ -208,7 +208,7 @@ void RevEng_PAJ7620::initializeDeviceSettings()
 {
   selectRegisterBank(BANK0);  // Config starts in BANK0
 
-  for (int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
+  for (unsigned int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
   {
     #ifdef PROGMEM_COMPATIBLE
       uint16_t word = pgm_read_word(&initRegisterArray[i]);

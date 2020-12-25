@@ -46,16 +46,18 @@
 #ifndef __PAJ7620_H__
 #define __PAJ7620_H__
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include <Wire.h>
 
 #if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #define PROGMEM_COMPATIBLE
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
-#include <pgmspace.h>
-#else
-#include <avr/pgmspace.h>
-#endif
+/*
+  #if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266)
+    #include <avr/pgmspace.h>
+  #elif defined(ARDUINO_ARCH_ESP32)
+    #include <pgmspace.h>
+  #endif
+  */
 #endif
 
 /* 

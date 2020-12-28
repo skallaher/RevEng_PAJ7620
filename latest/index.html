@@ -69,7 +69,8 @@ $(function() {
 <div class="textblock"><p><a class="anchor" id="md__github_workspace_README"></a> </p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Description</h1>
-<p>The library here is for the PAJ7620 sensor with an I2C interface. The device also has several variants such as the PAJ7620U2 and PAJ7620F2. The device provides simple motion-based gesture recognition. It can recognize 9 hand moving gestures including:</p><ul>
+<p>The library here is for the PAJ7620 sensor with an I2C interface. The device also has several variants such as the PAJ7620U2 and PAJ7620F2. The device provides simple motion-based gesture recognition, object tracking (cursor mode), and other (unimplemented so far) modes.</p>
+<p>In gesture mode it can recognize 9 hand moving gestures including:</p><ul>
 <li>move up</li>
 <li>move down</li>
 <li>move left</li>
@@ -179,6 +180,9 @@ Cursor Mode Summary</h2>
  sensor.getCursorY(); <br  />
  </p>
 </blockquote>
+<p>The program can return to gesture mode with the setGestureMode call: </p><blockquote class="doxtable">
+<p>sensor.setGestureMode(); </p>
+</blockquote>
 <hr  />
 <h1><a class="anchor" id="autotoc_md14"></a>
 Library History</h1>
@@ -186,10 +190,13 @@ Library History</h1>
 Version 1.4.0</h3>
 <ul>
 <li>Work done by <a href="https://github.com/acrandal">Aaron S. Crandall</a> &lt;<a href="#" onclick="location.href='mai'+'lto:'+'cra'+'nd'+'all'+'@g'+'onz'+'ag'+'a.e'+'du'; return false;">crand<span style="display: none;">.nosp@m.</span>all@<span style="display: none;">.nosp@m.</span>gonza<span style="display: none;">.nosp@m.</span>ga.e<span style="display: none;">.nosp@m.</span>du</a>&gt; and <a href="https://github.com/skallaher">Sean Kallaher</a>.</li>
-<li>Developed cursor mode - a object tracking on a (x,y) coordinate system</li>
+<li>Developed cursor mode - an object tracking on a (x,y) coordinate system</li>
 <li>Doxygen documentation system put in place</li>
 <li>GitHub pages documentation updates on master merges and version tags</li>
 <li>CI build and test framework, currently building on Linux, MacOS, and Windows</li>
+<li>Added APIs for inverting the X and Y axes - works in all modes</li>
+<li>Slimmed down the initialization array from 440 bytes to 100 bytes</li>
+<li>Created a proper gesture mode register array to allow returning to gesture mode from cursor mode</li>
 </ul>
 <h3><a class="anchor" id="autotoc_md16"></a>
 Version 1.3.0</h3>

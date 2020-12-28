@@ -4,10 +4,10 @@ var indexSectionsWithContent =
   1: "r",
   2: "er",
   3: "bcdegirs",
-  4: "i",
+  4: "is",
   5: "bg",
   6: "bg",
-  7: "cgip",
+  7: "cgips",
   8: "g"
 };
 

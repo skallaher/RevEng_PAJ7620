@@ -118,7 +118,21 @@
 #define PAJ7620_ADDR_GES_RESULT_0         (PAJ7620_ADDR_BASE + 0x43)  // R
 /** \note Readonly */
 #define PAJ7620_ADDR_GES_RESULT_1         (PAJ7620_ADDR_BASE + 0x44)  // R
+
+// Cursor Registers - Bank 0
+/** \note Readonly */
+#define PAJ7620_ADDR_CURSOR_X_LOW         (PAJ7620_ADDR_BASE + 0x3B)  // R
+/** \note Readonly */
+#define PAJ7620_ADDR_CURSOR_X_HIGH        (PAJ7620_ADDR_BASE + 0x3C)  // R
+/** \note Readonly */
+#define PAJ7620_ADDR_CURSOR_Y_LOW         (PAJ7620_ADDR_BASE + 0x3D)  // R
+/** \note Readonly */
+#define PAJ7620_ADDR_CURSOR_Y_HIGH        (PAJ7620_ADDR_BASE + 0x3E)  // R
+/** \note Readonly */
+#define PAJ7620_ADDR_CURSOR_INT           (PAJ7620_ADDR_BASE + 0x44)  // R
 /**@}*/
+
+// REGISTER BANK 1
 
 /** @name REGISTER BANK 1
  *  Addresses used within register bank 1
@@ -198,6 +212,53 @@
 /** Bit set -> Wave gesture detected. \note: Read from #PAJ7620_ADDR_GES_RESULT_1 */
 #define GES_WAVE_FLAG                     0x01      // Read from Bank0 - 0x44
 /**@}*/
+
+
+// Return values for cursor interrupt/status for cursor mode
+//  Read from Bank 0, reg 0x44
+#define CUR_HAS_OBJECT                    0x04      // Bit 2 - 0000 0100
+#define CUR_NO_OBJECT                     0x80      // Bit 7 - 1000 0000
+
+
+#define INIT_CURSOR_REG_ARRAY_SIZE (sizeof(initCursorRegisterArray)/sizeof(initCursorRegisterArray[0]))
+
+#ifdef PROGMEM_COMPATIBLE
+const unsigned short initCursorRegisterArray[] PROGMEM = {
+#else
+const unsigned short initCursorRegisterArray[] = {
+#endif
+    0xEF00,   // Set Bank 0
+    0x3229,   // Default  29  [0] Cursor use top - def 1
+              //              [1] Cursor Use BG Model - def 0
+              //              [2] Cursor Invert Y - def 0       -- Not sure, doesn't seem to work
+              //              [3] Cursor Invert X - def 1
+              //              [5:4] Cursor top Ratio - def 0x2
+    0x3301,   // Default  01  R_PositionFilterStartSizeTh [7:0]
+    0x3400,   // Default  00  R_PositionFilterStartSizeTh [8]
+    0x3501,   // Default  01  R_ProcessFilterStartSizeTh [7:0]
+    0x3600,   // Default  00  R_ProcessFilterStartSizeTh [8]
+    0x3703,   // Default  09  R_CursorClampLeft [4:0]
+    0x381B,   // Default  15  R_CursorClampRight [4:0]
+    0x3903,   // Default  0A  R_CursorClampUp [4:0]
+    0x3A1B,   // Default  12  R_CursorClampDown [4:0]
+    0x4100,   // Interrupt enable mask - Should be 00 (disable gestures)
+              //              All gesture flags [7:0]
+    0x4284,   // Interrupt enable mask - Should be 84 (0b 1000 0100)
+              //              bit 0: Wave, wave mode use only
+              //              bit 1: Proximity, proximity mode use only
+              //              bit 2: Has Object, cursor mode use only
+              //              bit 3: Wake up trigger, trigger mode use only
+              //              bit 4: Confirm, confirm mode use only
+              //              bit 5: Abort, confirm mode use only
+              //              bit 6: N/A
+              //              bit 7:No Object, cursor mode use only
+    0x8B01,   // Default  10  R_Cursor_ObjectSizeTh [7:0]
+    0x8C07,   // Default  07  R_PositionResolution [2:0]
+    0xEF01,   // Set Bank 1
+    0x0403,   // Invert X&Y Axes in lens for GUI coordinates 
+              //  Where (0,0) is in upper left, positive down (Y) and right (X)
+    0x7403,   // Enable cursor mode 0 - gesture, 3 - cursor, 5 - proximity
+    0xEF00    // Set Bank 0 (parking it)
 
 /** 
   Gesture result definitions.
@@ -490,6 +551,13 @@ class RevEng_PAJ7620
     // void setGameMode(); // No documentation for this mode is available (yet)
     void disable();                 // Suspend interrupts (both pin and registers)
     void enable();                  // Resume interrupts (both pin and registers)
+
+    void setGestureMode();          // Put sensor into gesture mode
+    void setCursorMode();           // Put sensor into cursor mode
+    bool isCursorInView();          // Cursor object in view
+
+    int getCursorX();               // Get cursor's X axis location
+    int getCursorY();               // Get cusors's Y axis location
 
   private:
     unsigned long gestureEntryTime; // User set gesture entry delay in ms (default: 0)

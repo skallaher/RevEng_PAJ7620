@@ -225,6 +225,88 @@ void RevEng_PAJ7620::initializeDeviceSettings()
   }
 }
 
+/****************************************************************
+****************************************************************/
+void RevEng_PAJ7620::setGestureMode()
+{
+  initializeDeviceSettings();           // this is brute force, but functional
+}
+
+/****************************************************************
+****************************************************************/
+void RevEng_PAJ7620::setCursorMode()
+{
+  selectRegisterBank(BANK0);  // Config starts in BANK0
+
+  for (unsigned int i = 0; i < INIT_CURSOR_REG_ARRAY_SIZE; i++)
+  {
+    #ifdef PROGMEM_COMPATIBLE
+      uint16_t word = pgm_read_word(&initCursorRegisterArray[i]);
+    #else
+      uint16_t word = initCursorRegisterArray[i];
+    #endif
+
+    uint8_t address, value;
+    address = (word & 0xFF00) >> 8;
+    value = (word & 0x00FF);
+    writeRegister(address, value);
+  }
+
+  selectRegisterBank(BANK0);  // park in bank0 by default
+}
+
+/****************************************************************
+****************************************************************/
+int RevEng_PAJ7620::getCursorX()
+{
+  int result = 0;
+  uint8_t data0 = 0x00;
+  uint8_t data1 = 0x00;
+
+  readRegister(PAJ7620_ADDR_CURSOR_X_LOW, 1, &data0);
+  readRegister(PAJ7620_ADDR_CURSOR_X_HIGH, 1, &data1);
+  data1 &= 0x0F;      // Mask off high bits (unused)
+  result |= data1;
+  result = result << 8;
+  result |= data0;
+
+  return result;
+}
+
+/****************************************************************
+****************************************************************/
+int RevEng_PAJ7620::getCursorY()
+{
+  int result = 0;
+  uint8_t data0 = 0x00;
+  uint8_t data1 = 0x00;
+
+  readRegister(PAJ7620_ADDR_CURSOR_Y_LOW, 1, &data0);
+  readRegister(PAJ7620_ADDR_CURSOR_Y_HIGH, 1, &data1);
+  data1 &= 0x0F;      // Mask off high bits (unused)
+  result |= data1;
+  result = result << 8;
+  result |= data0;
+
+  return result;
+}
+
+
+/****************************************************************
+****************************************************************/
+bool RevEng_PAJ7620::isCursorInView()
+{
+  bool result = false;
+  uint8_t data = 0x00;
+  readRegister(PAJ7620_ADDR_CURSOR_INT, 1, &data);
+  switch(data)
+  {
+    case CUR_NO_OBJECT:   result = false;   break;
+    case CUR_HAS_OBJECT:  result = true;    break;
+    default:              result = false;   break;
+  }
+  return result;
+}
 
 /****************************************************************
    Disables sensor for reading & interrupts

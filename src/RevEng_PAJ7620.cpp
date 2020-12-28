@@ -1,15 +1,17 @@
 /*
   RevEng_PAJ7620.cpp
 
-  Copyright (c) 2015 seeed technology inc.
-  Website    : www.seeed.cc
-  Author     : Wuruibin & Xiangnan
-  Modified Time: June 2015
-   
-  2017 - Modified by MarcFinns to encapsulate in class without global variables
-  2020 - PROGMEM code adapted from Jaycar Electronics' work
-  2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
+  - Copyright (c) 2015 seeed technology inc.
+  - Website    : www.seeed.cc
+  - Author     : Wuruibin & Xiangnan
+  - Modified Time: June 2015
 
+  Additional contributions:
+  - 2017 - Modified by MarcFinns to encapsulate in class without global variables  
+  - 2020 - PROGMEM code adapted from Jaycar-Electronics' work  
+  - 2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>  
+  - 2020 - Modified by Sean Kallaher (GitHub: skallaher) 
+   
   Version: 1.4.0
 
   Description: This demo can recognize 9 gestures and output the result,
@@ -74,6 +76,7 @@ uint8_t RevEng_PAJ7620::begin(TwoWire *chosenWireHandle)
   wireHandle = chosenWireHandle;      // Save selected I2C bus for our use
 
   delayMicroseconds(700);	            // Wait 700us for PAJ7620U2 to stabilize
+                                      // Reason: see v0.8 of 7620 documentation
   wireHandle->begin();
   selectRegisterBank(BANK0);          // Default operations on BANK0
 
@@ -81,11 +84,8 @@ uint8_t RevEng_PAJ7620::begin(TwoWire *chosenWireHandle)
     return 0;                         // Return false - wrong device found
   }
 
-  initializeDeviceSettings();         // Set registers for gesture mode
-
-  // WARNING: Failing to select BANK0 here will make the device not work
-  //  No, I don't know why - Crandall
-  selectRegisterBank(BANK0);          // Gesture flag registers in Bank0
+  initializeDeviceSettings();         // Set registers up
+  setCursorMode();                    // Specifically set to gesture mode
 
   return 1;
 }
@@ -200,6 +200,27 @@ bool RevEng_PAJ7620::isPAJ7620UDevice()
 
 
 /****************************************************************
+****************************************************************/
+void RevEng_PAJ7620::writeRegisterArray(unsigned short array[], int arraySize)
+{
+  for (unsigned int i = 0; i < arraySize; i++)
+  {
+    #ifdef PROGMEM_COMPATIBLE
+      uint16_t word = pgm_read_word(&array[i]);
+    #else
+      uint16_t word = array[i];
+    #endif
+
+    uint8_t address, value;
+    address = (word & 0xFF00) >> 8;
+    value = (word & 0x00FF);
+    writeRegister(address, value);
+  }
+  selectRegisterBank(BANK0);        // Guarantee parking in BANK0
+}
+
+
+/****************************************************************
    Function Name: initializeDeviceSettings
    Description: Write settings to enable I2C gesture recognition
       See header for initRegisterArray definition
@@ -208,52 +229,25 @@ bool RevEng_PAJ7620::isPAJ7620UDevice()
 ****************************************************************/
 void RevEng_PAJ7620::initializeDeviceSettings()
 {
-  selectRegisterBank(BANK0);  // Config starts in BANK0
-
-  for (unsigned int i = 0; i < INIT_REG_ARRAY_SIZE; i++)
-  {
-    #ifdef PROGMEM_COMPATIBLE
-      uint16_t word = pgm_read_word(&initRegisterArray[i]);
-    #else
-      uint16_t word = initRegisterArray[i];
-    #endif
-
-    uint8_t address, value;
-    address = (word & 0xFF00) >> 8;
-    value = (word & 0x00FF);
-    writeRegister(address, value);
-  }
+  writeRegisterArray(initRegisterArray, INIT_REG_ARRAY_SIZE);
 }
+
 
 /****************************************************************
 ****************************************************************/
 void RevEng_PAJ7620::setGestureMode()
 {
-  initializeDeviceSettings();           // this is brute force, but functional
+  writeRegisterArray(setGestureModeRegisterArray, SET_GES_MODE_REG_ARRAY_SIZE);
 }
+
 
 /****************************************************************
 ****************************************************************/
 void RevEng_PAJ7620::setCursorMode()
 {
-  selectRegisterBank(BANK0);  // Config starts in BANK0
-
-  for (unsigned int i = 0; i < INIT_CURSOR_REG_ARRAY_SIZE; i++)
-  {
-    #ifdef PROGMEM_COMPATIBLE
-      uint16_t word = pgm_read_word(&initCursorRegisterArray[i]);
-    #else
-      uint16_t word = initCursorRegisterArray[i];
-    #endif
-
-    uint8_t address, value;
-    address = (word & 0xFF00) >> 8;
-    value = (word & 0x00FF);
-    writeRegister(address, value);
-  }
-
-  selectRegisterBank(BANK0);  // park in bank0 by default
+  writeRegisterArray(setCursorModeRegisterArray, SET_CURSOR_MODE_REG_ARRAY_SIZE);
 }
+
 
 /****************************************************************
 ****************************************************************/
@@ -272,6 +266,7 @@ int RevEng_PAJ7620::getCursorX()
 
   return result;
 }
+
 
 /****************************************************************
 ****************************************************************/
@@ -307,6 +302,33 @@ bool RevEng_PAJ7620::isCursorInView()
   }
   return result;
 }
+
+
+/****************************************************************
+****************************************************************/
+void RevEng_PAJ7620::invertXAxis()
+{
+  uint8_t data = 0x00;
+  selectRegisterBank(BANK1);
+  readRegister(PAJ7620_ADDR_LENS_ORIENTATION, 1, &data);
+  data ^= 1UL << 0;               // Bit[0] controls X axis
+  writeRegister(PAJ7620_ADDR_LENS_ORIENTATION, data);
+  selectRegisterBank(BANK0);
+}
+
+
+/****************************************************************
+****************************************************************/
+void RevEng_PAJ7620::invertYAxis()
+{
+  uint8_t data = 0x00;
+  selectRegisterBank(BANK1);
+  readRegister(PAJ7620_ADDR_LENS_ORIENTATION, 1, &data);
+  data ^= 1UL << 1;                 // Bit[1] controls Y axis
+  writeRegister(PAJ7620_ADDR_LENS_ORIENTATION, data);
+  selectRegisterBank(BANK0);
+}
+
 
 /****************************************************************
    Disables sensor for reading & interrupts

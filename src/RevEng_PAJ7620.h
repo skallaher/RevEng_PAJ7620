@@ -13,7 +13,7 @@
   2020 - PROGMEM code adapted from Jaycar-Electronics' work
   2020 - Modified by Aaron S. Crandall <crandall@gonzaga.edu>
 
-  Version: 1.3.0
+  Version: 1.4.0
 
   Description: This demo can recognize 9 gestures and output the result,
         including move up, move down, move left, move right,
@@ -133,7 +133,6 @@
 /**@}*/
 
 // REGISTER BANK 1
-
 /** @name REGISTER BANK 1
  *  Addresses used within register bank 1
  */
@@ -213,7 +212,6 @@
 #define GES_WAVE_FLAG                     0x01      // Read from Bank0 - 0x44
 /**@}*/
 
-
 // Return values for cursor interrupt/status for cursor mode
 //  Read from Bank 0, reg 0x44
 #define CUR_HAS_OBJECT                    0x04      // Bit 2 - 0000 0100
@@ -259,6 +257,7 @@ const unsigned short initCursorRegisterArray[] = {
               //  Where (0,0) is in upper left, positive down (Y) and right (X)
     0x7403,   // Enable cursor mode 0 - gesture, 3 - cursor, 5 - proximity
     0xEF00    // Set Bank 0 (parking it)
+};
 
 /** 
   Gesture result definitions.

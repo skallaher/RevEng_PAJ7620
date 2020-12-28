@@ -1,24 +1,39 @@
 var indexSectionsWithContent =
 {
-  0: "cegipr",
-  1: "er",
-  2: "cgip",
-  3: "g"
+  0: "bcdegiprs",
+  1: "r",
+  2: "er",
+  3: "bcdegirs",
+  4: "i",
+  5: "bg",
+  6: "bg",
+  7: "cgip",
+  8: "g"
 };
 
 var indexSectionNames =
 {
   0: "all",
-  1: "files",
-  2: "defines",
-  3: "pages"
+  1: "classes",
+  2: "files",
+  3: "functions",
+  4: "variables",
+  5: "enums",
+  6: "enumvalues",
+  7: "defines",
+  8: "pages"
 };
 
 var indexSectionLabels =
 {
   0: "All",
-  1: "Files",
-  2: "Macros",
-  3: "Pages"
+  1: "Classes",
+  2: "Files",
+  3: "Functions",
+  4: "Variables",
+  5: "Enumerations",
+  6: "Enumerator",
+  7: "Macros",
+  8: "Pages"
 };
 

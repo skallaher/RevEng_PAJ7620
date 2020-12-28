@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['init_5fcursor_5freg_5farray_5fsize_13',['INIT_CURSOR_REG_ARRAY_SIZE',['../RevEng__PAJ7620_8h.html#a2882fcc68ce59985011dba977a325945',1,'RevEng_PAJ7620.h']]],
-  ['init_5freg_5farray_5fsize_14',['INIT_REG_ARRAY_SIZE',['../RevEng__PAJ7620_8h.html#a55d86315808a3447b843700b8b2061d3',1,'RevEng_PAJ7620.h']]]
+  ['enable_8',['enable',['../classRevEng__PAJ7620.html#a2dcea77ee7a935bae6518fb0c07edd36',1,'RevEng_PAJ7620']]],
+  ['examples_2edoc_9',['examples.doc',['../examples_8doc.html',1,'']]]
 ];

@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - master
+      - develop
   pull_request:
     branches:
       - main
       - master
+      - develop
   release:
     types:
       - created
@@ -17,7 +19,7 @@ jobs:
   "unittest_reveng_paj7620":
      strategy:
        matrix:
-         os: [ubuntu-latest, macos-latest, windows-latest]
+         os: [ubuntu-latest]
      runs-on: ${{ matrix.os }}
      steps:
        - uses: actions/checkout@v2
